@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: farmconnect
+    runtime: docker
+    plan: starter            # a paid plan is needed for a persistent disk
+    healthCheckPath: /health
+    disk: { name: data, mountPath: /var/data, sizeGB: 1 }
+    envVars:
+      - { key: TRUST_PROXY, value: "1" }
+      - { key: DB_PATH, value: /var/data/farmconnect.db }
+      - { key: ADMIN_PHONE, sync: false }
+      - { key: ADMIN_PASSWORD, sync: false }
+      - { key: RAZORPAY_KEY_ID, sync: false }
+      - { key: RAZORPAY_KEY_SECRET, sync: false }
+      - { key: RAZORPAY_WEBHOOK_SECRET, sync: false }
+      - { key: SMS_PROVIDER, value: msg91 }
+      - { key: MSG91_AUTHKEY, sync: false }
+      - { key: MSG91_TEMPLATE_ID, sync: false }
+      - { key: SUPPORT_EMAIL, sync: false }
+      - { key: SUPPORT_PHONE, sync: false }
+      - { key: GRIEVANCE_NAME, sync: false }
+      - { key: BUSINESS_ADDRESS, sync: false }
+      - { key: FSSAI_NO, sync: false }

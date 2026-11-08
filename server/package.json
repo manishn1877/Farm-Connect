@@ -1,0 +1,1 @@
+{"name":"farmconnect-server","version":"1.0.0","private":true,"engines":{"node":">=22.5"},"scripts":{"start":"node --no-warnings server.js","seed":"node --no-warnings seed.js","test":"node --no-warnings test.js"}}

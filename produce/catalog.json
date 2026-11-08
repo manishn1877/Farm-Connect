@@ -1,0 +1,662 @@
+[
+  {
+    "name": "Allahabad Guava",
+    "category": "Fruits",
+    "image": "produce/allahabad-guava.jpg",
+    "wikipedia": "Guava"
+  },
+  {
+    "name": "Amaranth Leaves",
+    "category": "Greens",
+    "image": "produce/amaranth-leaves.jpg",
+    "wikipedia": "Amaranth"
+  },
+  {
+    "name": "Amla",
+    "category": "",
+    "image": "produce/amla.jpg",
+    "wikipedia": "Phyllanthus emblica"
+  },
+  {
+    "name": "Apple",
+    "category": "Fruits",
+    "image": "produce/apple.jpg",
+    "wikipedia": "Apple"
+  },
+  {
+    "name": "Ash Gourd",
+    "category": "Vegetables",
+    "image": "produce/ash-gourd.jpg",
+    "wikipedia": "Benincasa hispida"
+  },
+  {
+    "name": "Baby Corn",
+    "category": "Vegetables",
+    "image": "produce/baby-corn.jpg",
+    "wikipedia": "Baby corn"
+  },
+  {
+    "name": "Bajra",
+    "category": "Grains",
+    "image": "produce/bajra.jpg",
+    "wikipedia": "Pearl millet"
+  },
+  {
+    "name": "Banana Flower",
+    "category": "Vegetables",
+    "image": "produce/banana-flower.jpg",
+    "wikipedia": "Banana heart"
+  },
+  {
+    "name": "Banana Stem",
+    "category": "Vegetables",
+    "image": "produce/banana-stem.jpg",
+    "wikipedia": "Banana"
+  },
+  {
+    "name": "Basil",
+    "category": "Greens",
+    "image": "produce/basil.jpg",
+    "wikipedia": "Basil"
+  },
+  {
+    "name": "Beans",
+    "category": "Vegetables",
+    "image": "produce/beans.jpg",
+    "wikipedia": "Green bean"
+  },
+  {
+    "name": "Beetroot",
+    "category": "",
+    "image": "produce/beetroot.jpg",
+    "wikipedia": "Beetroot"
+  },
+  {
+    "name": "Bitter Gourd",
+    "category": "Vegetables",
+    "image": "produce/bitter-gourd.jpg",
+    "wikipedia": "Momordica charantia"
+  },
+  {
+    "name": "Bottle Gourd",
+    "category": "Vegetables",
+    "image": "produce/bottle-gourd.jpg",
+    "wikipedia": "Calabash"
+  },
+  {
+    "name": "Brinjal",
+    "category": "Vegetables",
+    "image": "produce/brinjal.jpg",
+    "wikipedia": "Eggplant"
+  },
+  {
+    "name": "Broccoli",
+    "category": "",
+    "image": "produce/broccoli.jpg",
+    "wikipedia": "Broccoli"
+  },
+  {
+    "name": "Button Mushroom",
+    "category": "Vegetables",
+    "image": "produce/button-mushroom.jpg",
+    "wikipedia": "Agaricus bisporus"
+  },
+  {
+    "name": "Cabbage",
+    "category": "",
+    "image": "produce/cabbage.jpg",
+    "wikipedia": "Cabbage"
+  },
+  {
+    "name": "Capsicum",
+    "category": "Vegetables",
+    "image": "produce/capsicum.jpg",
+    "wikipedia": "Bell pepper"
+  },
+  {
+    "name": "Carrot",
+    "category": "Vegetables",
+    "image": "produce/carrot.jpg",
+    "wikipedia": "Carrot"
+  },
+  {
+    "name": "Cauliflower",
+    "category": "Vegetables",
+    "image": "produce/cauliflower.jpg",
+    "wikipedia": "Cauliflower"
+  },
+  {
+    "name": "Cherries",
+    "category": "Fruits",
+    "image": "produce/cherries.jpg",
+    "wikipedia": "Cherry"
+  },
+  {
+    "name": "Cherry Tomato",
+    "category": "Vegetables",
+    "image": "produce/cherry-tomato.jpg",
+    "wikipedia": "Cherry tomato"
+  },
+  {
+    "name": "Cluster Beans",
+    "category": "Vegetables",
+    "image": "produce/cluster-beans.jpg",
+    "wikipedia": "Guar"
+  },
+  {
+    "name": "Colocasia",
+    "category": "",
+    "image": "produce/colocasia.jpg",
+    "wikipedia": "Taro"
+  },
+  {
+    "name": "Coriander",
+    "category": "Greens",
+    "image": "produce/coriander.jpg",
+    "wikipedia": "Coriander"
+  },
+  {
+    "name": "Country Onions",
+    "category": "Vegetables",
+    "image": "produce/country-onions.jpg",
+    "wikipedia": "Onion"
+  },
+  {
+    "name": "Cucumber",
+    "category": "Vegetables",
+    "image": "produce/cucumber.jpg",
+    "wikipedia": "Cucumber"
+  },
+  {
+    "name": "Curry Leaves",
+    "category": "Greens",
+    "image": "produce/curry-leaves.jpg",
+    "wikipedia": "Curry tree"
+  },
+  {
+    "name": "Custard Apple",
+    "category": "Fruits",
+    "image": "produce/custard-apple.jpg",
+    "wikipedia": "Custard apple"
+  },
+  {
+    "name": "Dill Leaves",
+    "category": "Greens",
+    "image": "produce/dill-leaves.jpg",
+    "wikipedia": "Dill"
+  },
+  {
+    "name": "Dragon Fruit",
+    "category": "Fruits",
+    "image": "produce/dragon-fruit.jpg",
+    "wikipedia": "Pitaya"
+  },
+  {
+    "name": "Drumstick",
+    "category": "Vegetables",
+    "image": "produce/drumstick.jpg",
+    "wikipedia": "Moringa oleifera"
+  },
+  {
+    "name": "Dry Coconut",
+    "category": "Fruits",
+    "image": "produce/dry-coconut.jpg",
+    "wikipedia": "Coconut"
+  },
+  {
+    "name": "Dry Red Chilli",
+    "category": "Other",
+    "image": "produce/dry-red-chilli.jpg",
+    "wikipedia": "Chili pepper"
+  },
+  {
+    "name": "Elephant Foot Yam",
+    "category": "Vegetables",
+    "image": "produce/elephant-foot-yam.jpg",
+    "wikipedia": "Amorphophallus paeoniifolius"
+  },
+  {
+    "name": "Farm Fresh Spinach",
+    "category": "Greens",
+    "image": "produce/farm-fresh-spinach.jpg",
+    "wikipedia": "Spinach"
+  },
+  {
+    "name": "Fenugreek Leaves",
+    "category": "",
+    "image": "produce/fenugreek-leaves.jpg",
+    "wikipedia": "Fenugreek"
+  },
+  {
+    "name": "Fig",
+    "category": "Fruits",
+    "image": "produce/fig.jpg",
+    "wikipedia": "Common fig"
+  },
+  {
+    "name": "Foxtail Millet",
+    "category": "Grains",
+    "image": "produce/foxtail-millet.jpg",
+    "wikipedia": "Foxtail millet"
+  },
+  {
+    "name": "Fresh Coriander",
+    "category": "Greens",
+    "image": "produce/fresh-coriander.jpg",
+    "wikipedia": "Coriander"
+  },
+  {
+    "name": "Fresh Tomatoes",
+    "category": "Vegetables",
+    "image": "produce/fresh-tomatoes.jpg",
+    "wikipedia": "Tomato"
+  },
+  {
+    "name": "Garlic",
+    "category": "Vegetables",
+    "image": "produce/garlic.jpg",
+    "wikipedia": "Garlic"
+  },
+  {
+    "name": "Ginger",
+    "category": "",
+    "image": "produce/ginger.jpg",
+    "wikipedia": "Ginger"
+  },
+  {
+    "name": "Grapes",
+    "category": "Fruits",
+    "image": "produce/grapes.jpg",
+    "wikipedia": "Grape"
+  },
+  {
+    "name": "Green Chilli",
+    "category": "Vegetables",
+    "image": "produce/green-chilli.jpg",
+    "wikipedia": "Chili pepper"
+  },
+  {
+    "name": "Green Peas",
+    "category": "Vegetables",
+    "image": "produce/green-peas.jpg",
+    "wikipedia": "Pea"
+  },
+  {
+    "name": "Groundnuts",
+    "category": "Other",
+    "image": "produce/groundnuts.jpg",
+    "wikipedia": "Peanut"
+  },
+  {
+    "name": "Horse Gram",
+    "category": "Grains",
+    "image": "produce/horse-gram.jpg",
+    "wikipedia": "Macrotyloma uniflorum"
+  },
+  {
+    "name": "Idli Rice",
+    "category": "Grains",
+    "image": "produce/idli-rice.jpg",
+    "wikipedia": "Rice"
+  },
+  {
+    "name": "Jackfruit",
+    "category": "Fruits",
+    "image": "produce/jackfruit.jpg",
+    "wikipedia": "Jackfruit"
+  },
+  {
+    "name": "Jaggery Blocks",
+    "category": "Other",
+    "image": "produce/jaggery-blocks.jpg",
+    "wikipedia": "Jaggery"
+  },
+  {
+    "name": "Jamun",
+    "category": "Fruits",
+    "image": "produce/jamun.jpg",
+    "wikipedia": "Syzygium cumini"
+  },
+  {
+    "name": "Jowar",
+    "category": "Grains",
+    "image": "produce/jowar.jpg",
+    "wikipedia": "Sorghum bicolor"
+  },
+  {
+    "name": "Kiwi",
+    "category": "Fruits",
+    "image": "produce/kiwi.jpg",
+    "wikipedia": "Kiwifruit"
+  },
+  {
+    "name": "Knol Khol",
+    "category": "Vegetables",
+    "image": "produce/knol-khol.jpg",
+    "wikipedia": "Kohlrabi"
+  },
+  {
+    "name": "Ladies Finger",
+    "category": "Vegetables",
+    "image": "produce/ladies-finger.jpg",
+    "wikipedia": "Okra"
+  },
+  {
+    "name": "Lemon",
+    "category": "Vegetables",
+    "image": "produce/lemon.jpg",
+    "wikipedia": "Lemon"
+  },
+  {
+    "name": "Lettuce",
+    "category": "Greens",
+    "image": "produce/lettuce.jpg",
+    "wikipedia": "Lettuce"
+  },
+  {
+    "name": "Mattu Gulla Brinjal",
+    "category": "Vegetables",
+    "image": "produce/mattu-gulla-brinjal.jpg",
+    "wikipedia": "Eggplant"
+  },
+  {
+    "name": "Mint",
+    "category": "Greens",
+    "image": "produce/mint.jpg",
+    "wikipedia": "Mentha"
+  },
+  {
+    "name": "Moong Dal",
+    "category": "Grains",
+    "image": "produce/moong-dal.jpg",
+    "wikipedia": "Mung bean"
+  },
+  {
+    "name": "Moringa Leaves",
+    "category": "Greens",
+    "image": "produce/moringa-leaves.jpg",
+    "wikipedia": "Moringa oleifera"
+  },
+  {
+    "name": "Muskmelon",
+    "category": "Fruits",
+    "image": "produce/muskmelon.jpg",
+    "wikipedia": "Cantaloupe"
+  },
+  {
+    "name": "Nendran Bananas",
+    "category": "Fruits",
+    "image": "produce/nendran-bananas.jpg",
+    "wikipedia": "Banana"
+  },
+  {
+    "name": "Onion",
+    "category": "Vegetables",
+    "image": "produce/onion.jpg",
+    "wikipedia": "Onion"
+  },
+  {
+    "name": "Orange",
+    "category": "Fruits",
+    "image": "produce/orange.jpg",
+    "wikipedia": "Orange (fruit)"
+  },
+  {
+    "name": "Organic Carrots",
+    "category": "Vegetables",
+    "image": "produce/organic-carrots.jpg",
+    "wikipedia": "Carrot"
+  },
+  {
+    "name": "Papaya",
+    "category": "",
+    "image": "produce/papaya.jpg",
+    "wikipedia": "Papaya"
+  },
+  {
+    "name": "Pear",
+    "category": "Fruits",
+    "image": "produce/pear.jpg",
+    "wikipedia": "Pear"
+  },
+  {
+    "name": "Pineapple",
+    "category": "Fruits",
+    "image": "produce/pineapple.jpg",
+    "wikipedia": "Pineapple"
+  },
+  {
+    "name": "Plum",
+    "category": "Fruits",
+    "image": "produce/plum.jpg",
+    "wikipedia": "Plum"
+  },
+  {
+    "name": "Poha",
+    "category": "Grains",
+    "image": "produce/poha.jpg",
+    "wikipedia": "Flattened rice"
+  },
+  {
+    "name": "Pomegranate",
+    "category": "Fruits",
+    "image": "produce/pomegranate.jpg",
+    "wikipedia": "Pomegranate"
+  },
+  {
+    "name": "Potato",
+    "category": "Vegetables",
+    "image": "produce/potato.jpg",
+    "wikipedia": "Potato"
+  },
+  {
+    "name": "Premium Ragi",
+    "category": "Grains",
+    "image": "produce/premium-ragi.jpg",
+    "wikipedia": "Finger millet"
+  },
+  {
+    "name": "Pumpkin",
+    "category": "Vegetables",
+    "image": "produce/pumpkin.jpg",
+    "wikipedia": "Pumpkin"
+  },
+  {
+    "name": "Radish",
+    "category": "Vegetables",
+    "image": "produce/radish.jpg",
+    "wikipedia": "Radish"
+  },
+  {
+    "name": "Ragi",
+    "category": "",
+    "image": "produce/ragi.jpg",
+    "wikipedia": "Finger millet"
+  },
+  {
+    "name": "Rava",
+    "category": "Grains",
+    "image": "produce/rava.jpg",
+    "wikipedia": "Semolina"
+  },
+  {
+    "name": "Raw Banana",
+    "category": "Vegetables",
+    "image": "produce/raw-banana.jpg",
+    "wikipedia": "Cooking banana"
+  },
+  {
+    "name": "Raw Mango",
+    "category": "Vegetables",
+    "image": "produce/raw-mango.jpg",
+    "wikipedia": "Mango"
+  },
+  {
+    "name": "Red Cabbage",
+    "category": "Vegetables",
+    "image": "produce/red-cabbage.jpg",
+    "wikipedia": "Red cabbage"
+  },
+  {
+    "name": "Ridge Gourd",
+    "category": "Vegetables",
+    "image": "produce/ridge-gourd.jpg",
+    "wikipedia": "Luffa acutangula"
+  },
+  {
+    "name": "Robusta Banana",
+    "category": "",
+    "image": "produce/robusta-banana.jpg",
+    "wikipedia": "Banana"
+  },
+  {
+    "name": "Sapota",
+    "category": "Fruits",
+    "image": "produce/sapota.jpg",
+    "wikipedia": "Sapodilla"
+  },
+  {
+    "name": "Sesame Seeds",
+    "category": "Other",
+    "image": "produce/sesame-seeds.jpg",
+    "wikipedia": "Sesame"
+  },
+  {
+    "name": "Snake Gourd",
+    "category": "",
+    "image": "produce/snake-gourd.jpg",
+    "wikipedia": "Trichosanthes cucumerina"
+  },
+  {
+    "name": "Sona Masoori Rice",
+    "category": "Grains",
+    "image": "produce/sona-masoori-rice.jpg",
+    "wikipedia": "Rice"
+  },
+  {
+    "name": "Spinach",
+    "category": "Greens",
+    "image": "produce/spinach.jpg",
+    "wikipedia": "Spinach"
+  },
+  {
+    "name": "Spring Onion",
+    "category": "Vegetables",
+    "image": "produce/spring-onion.jpg",
+    "wikipedia": "Scallion"
+  },
+  {
+    "name": "Strawberry",
+    "category": "",
+    "image": "produce/strawberry.jpg",
+    "wikipedia": "Strawberry"
+  },
+  {
+    "name": "Sweet Corn",
+    "category": "Vegetables",
+    "image": "produce/sweet-corn.jpg",
+    "wikipedia": "Sweet corn"
+  },
+  {
+    "name": "Sweet Lime",
+    "category": "Fruits",
+    "image": "produce/sweet-lime.jpg",
+    "wikipedia": "Citrus limetta"
+  },
+  {
+    "name": "Sweet Potato",
+    "category": "Vegetables",
+    "image": "produce/sweet-potato.jpg",
+    "wikipedia": "Sweet potato"
+  },
+  {
+    "name": "Tamarind",
+    "category": "",
+    "image": "produce/tamarind.jpg",
+    "wikipedia": "Tamarind"
+  },
+  {
+    "name": "Tender Beans",
+    "category": "Vegetables",
+    "image": "produce/tender-beans.jpg",
+    "wikipedia": "Green bean"
+  },
+  {
+    "name": "Tender Coconut",
+    "category": "Other",
+    "image": "produce/tender-coconut.jpg",
+    "wikipedia": "Coconut"
+  },
+  {
+    "name": "Tindora",
+    "category": "Vegetables",
+    "image": "produce/tindora.jpg",
+    "wikipedia": "Coccinia grandis"
+  },
+  {
+    "name": "Tomato",
+    "category": "",
+    "image": "produce/tomato.jpg",
+    "wikipedia": "Tomato"
+  },
+  {
+    "name": "Toor Dal",
+    "category": "",
+    "image": "produce/toor-dal.jpg",
+    "wikipedia": "Pigeon pea"
+  },
+  {
+    "name": "Totapuri Mango",
+    "category": "Fruits",
+    "image": "produce/totapuri-mango.jpg",
+    "wikipedia": "Mango"
+  },
+  {
+    "name": "Turmeric",
+    "category": "Other",
+    "image": "produce/turmeric.jpg",
+    "wikipedia": "Turmeric"
+  },
+  {
+    "name": "Turnip",
+    "category": "Vegetables",
+    "image": "produce/turnip.jpg",
+    "wikipedia": "Turnip"
+  },
+  {
+    "name": "Urad Dal",
+    "category": "Grains",
+    "image": "produce/urad-dal.jpg",
+    "wikipedia": "Vigna mungo"
+  },
+  {
+    "name": "Watermelon",
+    "category": "Fruits",
+    "image": "produce/watermelon.jpg",
+    "wikipedia": "Watermelon"
+  },
+  {
+    "name": "Wheat Atta",
+    "category": "Grains",
+    "image": "produce/wheat-atta.jpg",
+    "wikipedia": "Atta"
+  },
+  {
+    "name": "Wild Honey",
+    "category": "Other",
+    "image": "produce/wild-honey.jpg",
+    "wikipedia": "Honey"
+  },
+  {
+    "name": "Yelakki Banana",
+    "category": "Fruits",
+    "image": "produce/yelakki-banana.jpg",
+    "wikipedia": "Banana"
+  },
+  {
+    "name": "Zucchini",
+    "category": "",
+    "image": "produce/zucchini.jpg",
+    "wikipedia": "Zucchini"
+  }
+]
