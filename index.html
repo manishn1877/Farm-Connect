@@ -1,8 +1,6 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#1c6b3e"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><meta name="description" content="Buy fresh fruit and vegetables from Bengaluru markets and farmers. Reserve for pickup or get it delivered.">
-<style>html{padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>FarmConnect</title>
-
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;600;700&display=swap">
 <style>
 /* Layout concept: a market-day app. Left column leads with the shopping task, a schematic Bengaluru map anchors the first screen, and the farmer workspace reuses the same surfaces as a ledger of requests and stock. */
@@ -681,8 +679,393 @@ html.kn .hero h1 em{white-space:normal}
 .botlang{display:flex;border-radius:10px;overflow:hidden;background:color-mix(in srgb,var(--brand-ink) 16%,transparent)}
 .botlang button{padding:0 9px;height:34px;font-size:12px;font-weight:700;color:var(--brand-ink);opacity:.75}
 .botlang button.on{background:var(--brand-ink);color:var(--brand);opacity:1}
-</style></head><body>
-<!--FC_BOOT-->
+
+/* ===== VISUAL LAYER: one connected motif (sun, hills, leaf corners, gentle rise) ===== */
+body{overflow-x:clip}
+.fc-prog{position:fixed;top:0;left:0;height:3px;width:100%;z-index:300;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--leaf),var(--lime),var(--accent),var(--mango));pointer-events:none}
+.wrap.view.fc-host{position:relative}
+.fcscene{position:absolute;top:-26px;left:50%;width:100vw;height:360px;transform:translateX(-50%);z-index:-1;pointer-events:none;overflow:hidden;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.fcscene svg{position:absolute;inset:0;width:100%;height:100%}
+.fcscene .sun{transform-box:fill-box;transform-origin:center;animation:fcspin 60s linear infinite}
+.fcscene .sunglow{transform-box:fill-box;transform-origin:center;animation:fcbreathe 5s ease-in-out infinite}
+.fcscene .cloud{animation:fcdrift 70s linear infinite}
+.fcscene .cloud.c2{animation-duration:95s;animation-delay:-40s}
+.fcscene .cloud.c3{animation-duration:80s;animation-delay:-20s}
+.fcscene .sway{transform-box:fill-box;transform-origin:50% 100%;animation:fcsway 4s ease-in-out infinite}
+.fcscene .sway:nth-child(2n){animation-delay:-1.3s}.fcscene .sway:nth-child(3n){animation-delay:-2.4s}
+.fcfloat{position:absolute;font-size:34px;filter:drop-shadow(0 8px 6px rgba(0,0,0,.14));animation:fcbob 6s ease-in-out infinite;opacity:.95}
+@keyframes fcspin{to{transform:rotate(360deg)}}
+@keyframes fcbreathe{50%{transform:scale(1.14);opacity:.7}}
+@keyframes fcdrift{from{transform:translateX(-260px)}to{transform:translateX(1500px)}}
+@keyframes fcsway{50%{transform:rotate(4deg)}}
+@keyframes fcbob{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-16px) rotate(6deg)}}
+/* leaf-corner shapes tie every surface together */
+.card{border-radius:24px 24px 24px 6px}
+.panel,.ocard,.board{border-radius:24px 24px 24px 8px}
+.mapcard{border-radius:28px 28px 28px 8px}
+.cta{border-radius:30px 90px 30px 90px;background:radial-gradient(circle at 12% 18%,rgba(255,255,255,.13) 0 60px,transparent 61px),radial-gradient(circle at 88% 85%,rgba(242,181,29,.28) 0 110px,transparent 111px),var(--brand)}
+.mrow{border-radius:18px 18px 18px 6px}
+.band>h2:before{content:"";display:inline-block;width:.7em;height:.7em;margin-right:.35em;border-radius:0 80% 0 80%;background:linear-gradient(135deg,var(--lime),var(--leaf));transform:rotate(-8deg);vertical-align:.02em}
+.hero h1 em:after{background:linear-gradient(90deg,var(--accent),var(--mango))}
+/* motion */
+.brand .ic{animation:fcsway 5s ease-in-out infinite;transform-origin:50% 100%}
+.art span{animation:fcbob 5.5s ease-in-out infinite}
+.card:nth-child(2n) .art span{animation-delay:-1.4s}.card:nth-child(3n) .art span{animation-delay:-2.8s}
+.btn{position:relative;overflow:hidden}
+.btn:after{content:"";position:absolute;top:0;left:-70%;width:45%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-18deg);transition:left .6s}
+.btn:hover:after{left:130%}
+.card{--rx:0deg;--ry:0deg;transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry))}
+.card:hover{transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-4px)}
+.mnum{background:linear-gradient(135deg,var(--leaf),var(--brand))}
+.pin .drop path{filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
+.bcol,.stat,.tile{transition:transform .25s}
+.bcol:hover,.stat:hover{transform:translateY(-3px)}
+/* scroll reveal (only when script is running) */
+html.fc-js .fc-rv{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--d,0)*90ms)}
+html.fc-js .fc-rv.fc-in{opacity:1;transform:none}
+@media (max-width:720px){.fcscene{height:260px}.fcfloat{font-size:26px}.fcfloat.hm{display:none}}
+@media (prefers-reduced-motion:reduce){.fcscene *,.fcfloat,.brand .ic,.art span{animation:none!important}html.fc-js .fc-rv{opacity:1;transform:none;transition:none}.card{transform:none!important}.btn:after{display:none}}
+.fcscene{display:none!important}
+.fcbg{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.fcbg svg{position:absolute;inset:0;width:100%;height:100%}
+.fcbg .fx{opacity:.7;font-size:38px}
+.fcbg .cloud2{animation:fcpan 16s ease-in-out infinite alternate}
+.fcbg .cloud2.b{animation-duration:22s;animation-delay:-8s}
+@keyframes fcpan{to{transform:translateX(90px)}}
+body{background:transparent!important}
+html{background:var(--bg)}
+.top{background:color-mix(in srgb,var(--bg) 72%,transparent)}
+.foot{background:color-mix(in srgb,var(--surface) 80%,transparent);backdrop-filter:blur(8px)}
+@media (max-width:720px){.fcbg .fx{font-size:26px;opacity:.55}}
+@media (prefers-reduced-motion:reduce){.fcbg *{animation:none!important}}
+/* top bar: floating glass pill with a colour strip */
+.top{background:transparent!important;backdrop-filter:none!important;border-bottom:0!important;padding-top:10px}
+.top .topin{position:relative;width:calc(100% - 24px);max-width:1176px;margin:0 auto;padding-left:14px;padding-right:14px;background:color-mix(in srgb,var(--surface) 78%,transparent);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);border:1px solid var(--line);border-radius:24px 24px 24px 8px;box-shadow:var(--shadow);transition:height .3s,box-shadow .3s}
+.top .topin:after{content:"";position:absolute;left:26px;right:26px;bottom:-1px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--leaf),var(--lime),var(--accent),var(--mango),var(--tomato),var(--berry),var(--sky),var(--leaf));background-size:200% 100%;animation:fcstrip 14s linear infinite}
+@keyframes fcstrip{to{background-position:200% 0}}
+html.fc-scrolled .top .topin{height:54px;box-shadow:0 10px 30px rgba(19,40,28,.16)}
+.top .brand span{background:linear-gradient(90deg,var(--brand),var(--leaf) 55%,var(--mango));-webkit-background-clip:text;background-clip:text;color:transparent}
+.top .brand .ic{background:linear-gradient(135deg,var(--leaf),var(--brand));box-shadow:0 4px 12px color-mix(in srgb,var(--brand) 40%,transparent)}
+.nav{gap:6px}
+.nav button{border-radius:14px;transition:background .2s,color .2s,transform .2s}
+.nav button:hover{transform:translateY(-1px)}
+.nav button:nth-child(1) .ic{color:var(--leaf)}.nav button:nth-child(2) .ic{color:var(--sky)}.nav button:nth-child(3) .ic{color:var(--mango)}.nav button:nth-child(4) .ic{color:var(--berry)}
+.nav button.on{background:linear-gradient(135deg,var(--brand-soft),var(--lime-soft));color:var(--brand);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--brand) 25%,transparent)}
+.basketbtn{background:linear-gradient(135deg,var(--accent),var(--mango));box-shadow:0 6px 16px color-mix(in srgb,var(--mango) 35%,transparent);border-radius:14px}
+.top .btn.sm:not(.ghost){background:linear-gradient(135deg,var(--leaf),var(--brand))}
+.top .icon,.userchip{border-radius:14px}
+@media (max-width:720px){.top{padding-top:6px}.top .topin{width:calc(100% - 16px);border-radius:20px 20px 20px 6px}}
+@media (prefers-reduced-motion:reduce){.top .topin:after{animation:none}}
+/* ===== cards, bottom bar, footer and finishing touches ===== */
+/* vegetable cards */
+.card{border-top:0;background:linear-gradient(180deg,color-mix(in srgb,var(--c,#7bc47f) 10%,var(--surface)) 0,var(--surface) 48%);box-shadow:0 1px 2px rgba(19,40,28,.05);position:relative}
+.card:hover{box-shadow:0 18px 40px color-mix(in srgb,var(--c,#7bc47f) 30%,transparent);border-color:color-mix(in srgb,var(--c,#7bc47f) 55%,var(--line))}
+.card .art{height:140px;margin:10px 10px 0;border-radius:20px 20px 20px 6px;overflow:hidden;background:radial-gradient(circle at 50% 40%,color-mix(in srgb,var(--c,#7bc47f) 62%,var(--surface)),color-mix(in srgb,var(--c,#7bc47f) 22%,var(--surface2)))}
+.card .art:before,.card .art:after{content:"";position:absolute;border-radius:50%;background:color-mix(in srgb,var(--surface) 38%,transparent)}
+.card .art:before{width:110px;height:110px;left:-30px;bottom:-46px}.card .art:after{width:70px;height:70px;right:-16px;top:-22px}
+.card .art span{position:relative;z-index:1;font-size:66px}
+.card .stock{display:inline-flex;align-self:flex-start;padding:3px 9px;border-radius:99px;background:var(--leaf-soft);letter-spacing:.05em;font-size:10.5px}
+.card .stock.low{background:var(--warn-soft)}.card .stock.out{background:var(--bad-soft)}
+.card h4{font-size:20px}
+.card .price{display:flex;align-items:baseline;gap:4px;color:var(--ink)}
+.card .price small{font-size:12px}
+.card .save{border-radius:12px 12px 12px 4px;background:linear-gradient(90deg,var(--brand-soft),var(--lime-soft))}
+.card .by{padding-top:6px;border-top:1px dashed var(--line);margin-top:4px}
+.addbtn{border:0;color:var(--brand-ink);background:linear-gradient(135deg,var(--leaf),var(--brand));box-shadow:0 6px 14px color-mix(in srgb,var(--brand) 28%,transparent);border-radius:99px;padding:9px 22px}
+.addbtn:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}
+.addbtn:disabled{background:var(--surface2);color:var(--muted);box-shadow:none}
+.step{border-radius:99px;background:linear-gradient(135deg,var(--leaf),var(--brand))}
+.heart{backdrop-filter:blur(6px);background:color-mix(in srgb,var(--surface) 82%,transparent)}
+.card .trend{border-radius:99px}
+/* market cards */
+.mrow{position:relative;overflow:hidden;padding:16px 16px 16px 14px;background:linear-gradient(100deg,color-mix(in srgb,var(--leaf) 10%,var(--surface)),var(--surface) 55%)}
+.mrow:nth-child(4n+2){background:linear-gradient(100deg,color-mix(in srgb,var(--mango) 12%,var(--surface)),var(--surface) 55%)}
+.mrow:nth-child(4n+3){background:linear-gradient(100deg,color-mix(in srgb,var(--sky) 12%,var(--surface)),var(--surface) 55%)}
+.mrow:nth-child(4n+4){background:linear-gradient(100deg,color-mix(in srgb,var(--berry) 12%,var(--surface)),var(--surface) 55%)}
+.mrow:after{content:"→";position:absolute;right:14px;bottom:8px;font:600 16px var(--f-mono);color:var(--brand);opacity:0;transform:translateX(-8px);transition:.25s}
+.mrow:hover:after,.mrow.hl:after{opacity:1;transform:none}
+.mrow .mnum{width:44px;height:44px;font-size:16px;box-shadow:0 0 0 5px color-mix(in srgb,var(--brand) 15%,transparent)}
+.mrow:nth-child(4n+2) .mnum{background:linear-gradient(135deg,var(--accent),var(--mango));color:var(--accent-ink);box-shadow:0 0 0 5px color-mix(in srgb,var(--mango) 18%,transparent)}
+.mrow:nth-child(4n+3) .mnum{background:linear-gradient(135deg,var(--sky),#1e5f8c);box-shadow:0 0 0 5px color-mix(in srgb,var(--sky) 18%,transparent)}
+.mrow:nth-child(4n+4) .mnum{background:linear-gradient(135deg,var(--berry),#5e2a63);box-shadow:0 0 0 5px color-mix(in srgb,var(--berry) 18%,transparent)}
+.mrow .dist{padding:5px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line);align-self:start}
+.mrow small:last-of-type{color:var(--good);font-weight:600}
+/* bottom bar (phones): floating pill */
+@media (max-width:720px){
+  .tabbar{background:transparent!important;border-top:0!important;backdrop-filter:none!important;padding:0 8px calc(8px + env(safe-area-inset-bottom,0px))}
+  .tabbar .wrap{padding:4px 6px!important;background:color-mix(in srgb,var(--surface) 86%,transparent);backdrop-filter:blur(16px) saturate(1.3);border:1px solid var(--line);border-radius:24px 24px 24px 8px;box-shadow:0 10px 30px rgba(19,40,28,.18);position:relative}
+  .tabbar .wrap:before{content:"";position:absolute;top:-1px;left:24px;right:24px;height:3px;border-radius:3px;background:linear-gradient(90deg,var(--leaf),var(--accent),var(--mango),var(--berry),var(--sky))}
+  .tabbar button{border-radius:16px;transition:background .2s,transform .2s}
+  .tabbar button.on{background:linear-gradient(135deg,var(--brand-soft),var(--lime-soft))}
+  .tabbar button.on .ic{transform:translateY(-2px) scale(1.12)}
+  .tabbar .ic{transition:transform .25s}
+  .tabbar button:nth-child(1) .ic{color:var(--leaf)}.tabbar button:nth-child(2) .ic{color:var(--sky)}.tabbar button:nth-child(3) .ic{color:var(--mango)}.tabbar button:nth-child(4) .ic{color:var(--tomato)}.tabbar button:nth-child(5) .ic{color:var(--berry)}
+  .cookie{bottom:84px}
+  .botfab{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .botpanel{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+}
+/* footer */
+.foot{position:relative;margin-top:30px;background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 70%,transparent),color-mix(in srgb,var(--brand-soft) 70%,var(--surface)));border-top:0;border-radius:40px 40px 0 0}
+.foot:before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:min(520px,70%);height:4px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--leaf),var(--lime),var(--accent),var(--mango),var(--tomato),var(--berry),var(--sky))}
+.foot .brand span{background:linear-gradient(90deg,var(--brand),var(--mango));-webkit-background-clip:text;background-clip:text;color:transparent}
+.fcols h4{display:flex;align-items:center;gap:8px}
+.fcols h4:before{content:"";width:9px;height:9px;border-radius:0 80% 0 80%;background:var(--leaf)}
+.fcols>div:nth-child(3) h4:before{background:var(--mango)}.fcols>div:nth-child(4) h4:before{background:var(--sky)}.fcols>div:nth-child(5) h4:before{background:var(--berry)}
+.fcols .fl button{transition:color .2s,transform .2s}.fcols .fl button:hover{transform:translateX(4px)}
+.fbot{border-top:1px dashed var(--line)}
+/* finishing touches elsewhere */
+.hstep{padding:20px;border-radius:22px 22px 22px 6px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.hstep .n{display:inline-grid;place-items:center;padding:6px 12px;border-radius:99px;background:var(--leaf-soft);color:var(--leaf)}
+.hstep:nth-child(2) .n{background:var(--mango-soft);color:var(--mango)}.hstep:nth-child(3) .n{background:var(--sky-soft);color:var(--sky)}
+.shophead h2,.fhero h2{background:linear-gradient(90deg,var(--ink) 40%,var(--brand));-webkit-background-clip:text;background-clip:text;color:transparent}
+.field input,.field select,.field textarea,.search input,.sel{border-radius:14px}
+.chip{border-radius:99px;transition:transform .2s,background .2s}.chip:hover{transform:translateY(-2px)}
+.drawer{border-radius:26px 0 0 26px}.dhead{background:linear-gradient(90deg,var(--brand-soft),transparent)}
+.mbox{border-radius:28px 28px 28px 8px}
+.line{border-radius:14px}
+.orow{border-radius:18px 18px 18px 6px;border-left:4px solid var(--leaf)}.orow:nth-child(3n+2){border-left-color:var(--mango)}.orow:nth-child(3n){border-left-color:var(--sky)}
+.badge.done{background:linear-gradient(135deg,var(--leaf),var(--brand))}
+.empty{background:color-mix(in srgb,var(--surface) 60%,transparent);border-radius:24px 24px 24px 8px}
+.btn{border-radius:14px}
+/* ===== simplified, graphic produce cards ===== */
+.grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.card.pc{padding:0;background:var(--surface);border:1px solid var(--line);border-radius:28px 28px 28px 8px;overflow:hidden}
+.card.pc .art{height:176px;margin:0;border-radius:0;cursor:pointer;background:linear-gradient(160deg,color-mix(in srgb,var(--c) 70%,var(--surface)),color-mix(in srgb,var(--c) 30%,var(--surface)));display:grid;place-items:center}
+.card.pc .art:before{content:"";position:absolute;width:132px;height:132px;left:50%;top:50%;transform:translate(-50%,-52%);border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.55),rgba(255,255,255,.12) 70%);animation:fcbreathe 5s ease-in-out infinite;right:auto;bottom:auto}
+.card.pc .art:after{content:"";position:absolute;left:-20px;right:-20px;bottom:-1px;height:34px;border-radius:50% 50% 0 0/100% 100% 0 0;background:var(--surface);top:auto;width:auto}
+.card.pc .art .em{position:relative;z-index:1;font-size:84px;margin-top:-16px;filter:drop-shadow(0 12px 8px rgba(0,0,0,.22));animation:fcbob 5.5s ease-in-out infinite}
+.card.pc:hover .art .em{animation-play-state:paused;transform:scale(1.15) rotate(-8deg)}
+.card.pc .pimg{z-index:0}
+.card.pc .art .heart{z-index:3}
+.pbadge{position:absolute;z-index:3;top:12px;left:12px;padding:5px 11px;border-radius:99px;font:700 11.5px var(--f-body);background:var(--surface);color:var(--ink);box-shadow:0 4px 12px rgba(0,0,0,.14)}
+.pbadge.save{background:linear-gradient(135deg,var(--accent),var(--mango));color:var(--accent-ink)}
+.pbadge.low{background:var(--warn-soft);color:var(--warn)}.pbadge.out{background:var(--bad-soft);color:var(--bad)}.pbadge.fresh{background:var(--brand-soft);color:var(--brand)}
+.card.pc .cbody{padding:2px 16px 16px;gap:2px;position:relative;z-index:2}
+.card.pc h4{font-size:21px;cursor:pointer}
+.card.pc .pby{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);text-decoration:none;text-align:left;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fdot{width:8px;height:8px;border-radius:50%;flex:none;background:var(--warn)}.fdot.ok{background:var(--good);box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 25%,transparent)}
+.card.pc .buyrow{margin-top:10px;padding-top:0;align-items:center}
+.card.pc .price{font:600 24px var(--f-mono);letter-spacing:-.04em;color:var(--brand)}
+.card.pc .price small{font-size:12px;color:var(--muted)}
+.card.pc .addbtn{width:44px;height:44px;padding:0;border-radius:50%;font-size:0;position:relative;display:grid;place-items:center}
+.card.pc .addbtn:before{content:"+";font:500 26px/1 var(--f-mono);color:var(--brand-ink);position:static}
+.card.pc .addbtn:disabled{width:auto;height:auto;border-radius:99px;padding:8px 12px;font-size:12px}
+.card.pc .addbtn:disabled:before{content:none}
+.card.pc .step button{width:32px}
+.card.pc:hover{box-shadow:0 22px 44px color-mix(in srgb,var(--c) 32%,transparent)}
+@media (max-width:720px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card.pc .art{height:128px}.card.pc .art .em{font-size:62px}.card.pc .art:before{width:96px;height:96px}.card.pc h4{font-size:17px}.card.pc .price{font-size:19px}.card.pc .cbody{padding:2px 12px 12px}.card.pc .addbtn{width:38px;height:38px}.pbadge{top:8px;left:8px;font-size:10.5px;padding:4px 8px}}
+@media (prefers-reduced-motion:reduce){.card.pc .art:before,.card.pc .art .em{animation:none}}
+/* produce cards v3: every detail kept, laid out graphically */
+.card.pc .art{height:150px}
+.card.pc .art .em{font-size:72px}
+.pbadge.ok{background:var(--surface);color:var(--good)}
+.card.pc .heart{top:12px;right:12px;left:auto;z-index:4;width:38px;height:38px;display:grid}
+.card.pc .cbody{gap:5px;padding:0 16px 16px}
+.card.pc .fresh{display:flex;align-items:center;gap:6px;font-size:11.5px;margin:0}
+.card.pc h4{font-size:20px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.card.pc .prow2{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.card.pc .prow2 .trend{margin:0}
+.card.pc .save{font-size:12px;padding:8px 11px}
+.card.pc .by{font-size:12.5px;padding-top:7px;margin-top:2px;border-top:1px dashed var(--line);color:var(--muted)}
+.card.pc .buyrow{margin-top:8px;padding-top:0;gap:8px}
+.card.pc .cmpbtn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:99px;background:var(--sky-soft);color:var(--sky);font-weight:600;font-size:12.5px;text-decoration:none}
+.card.pc .cmpbtn:hover{background:var(--sky);color:#fff}
+.card.pc .cmpbtn .ic{width:14px;height:14px}
+/* buttons redesigned: pill with plus */
+.card.pc .addbtn{width:auto;height:auto;padding:9px 18px 9px 14px;border-radius:99px;font-size:14px;display:inline-flex;gap:6px;align-items:center;border:0}
+.card.pc .addbtn:before{content:"+";font:500 20px/1 var(--f-mono);color:inherit;display:inline-block;transition:transform .25s}
+.card.pc .addbtn:hover:not(:disabled):before{transform:rotate(90deg)}
+.card.pc .addbtn:disabled{padding:9px 14px}
+.card.pc .addbtn:disabled:before{content:none}
+.card.pc .step{border-radius:99px}
+@media (max-width:720px){.card.pc .buyrow{flex-wrap:wrap;justify-content:space-between}.card.pc .cmpbtn{padding:7px 10px}.card.pc .art{height:118px}.card.pc h4{font-size:16px}.card.pc .cbody{gap:4px;padding:0 12px 12px}.card.pc .addbtn{padding:8px 14px 8px 11px}}
+.card.pc .buyrow .link.cmpbtn{display:inline-flex!important}
+/* real photos on cards */
+.card.pc .art.hasimg .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;animation:fcfade .5s both}
+.card.pc .art.hasimg:before{display:none}
+.card.pc .art.hasimg:after{height:26px}
+.card.pc .art.hasimg{background:color-mix(in srgb,var(--c) 30%,var(--surface))}
+.card.pc:hover .art.hasimg .pimg{transform:scale(1.06)}
+.card.pc .art .pimg{transition:transform .5s}
+@keyframes fcfade{from{opacity:0}}
+/* assistant: cleaner layout */
+.botpanel{width:min(420px,calc(100vw - 24px));border-radius:28px 28px 28px 10px;border:0;box-shadow:0 30px 70px rgba(10,30,18,.35)}
+.bothead{background:linear-gradient(120deg,var(--brand),color-mix(in srgb,var(--brand) 55%,var(--sky)));padding:14px 14px 14px 18px}
+.botav{width:42px;height:42px;background:rgba(255,255,255,.2);box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+.botbody{padding:14px 14px 18px;gap:12px;background:linear-gradient(180deg,color-mix(in srgb,var(--brand-soft) 50%,var(--surface)),var(--surface) 140px)}
+.bstat{background:var(--surface);border:1px solid var(--line);border-radius:18px 18px 18px 5px;box-shadow:0 2px 8px rgba(19,40,28,.06);padding:12px 14px}
+.bstat.on{background:var(--brand-soft);border-color:transparent}
+.bmk{background:var(--surface);border-radius:16px}
+.btabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:16px;background:var(--surface2);position:sticky;top:-14px;z-index:2}
+.btabs button{padding:9px 4px;border-radius:12px;font-weight:650;font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;justify-content:center;transition:all .2s}
+.btabs button.on{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.btabs .bn{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--brand);color:var(--brand-ink);font:600 10.5px var(--f-mono)}
+.bchips.dishes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bchip.dish{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:18px 18px 18px 5px;border:1px solid var(--line);background:var(--surface);text-align:center;font-size:12.5px}
+.bchip.dish span{font-size:28px;transition:transform .25s}.bchip.dish:hover span{transform:scale(1.2) rotate(-8deg)}
+.bchip.dish b{font-weight:650;line-height:1.2}
+.bchip.dish:nth-child(4n+1){background:var(--leaf-soft)}.bchip.dish:nth-child(4n+2){background:var(--mango-soft)}.bchip.dish:nth-child(4n+3){background:var(--sky-soft)}.bchip.dish:nth-child(4n+4){background:var(--berry-soft)}
+.bchips.col{display:grid;gap:8px}.bchips.col .bchip{text-align:left;padding:12px 14px;border-radius:14px;font-size:13.5px}
+.bempty2{display:grid;place-items:center;gap:4px;padding:26px 10px;text-align:center;border:1.5px dashed var(--line);border-radius:20px}.bempty2 span{font-size:34px}.bempty2 small{color:var(--muted)}
+.botfoot{padding:12px 14px 14px;background:var(--surface);box-shadow:0 -8px 20px rgba(19,40,28,.06)}
+#botIn{border-radius:99px;padding:13px 16px;background:var(--surface2);border-color:transparent}
+#botIn:focus{outline:none;border-color:var(--brand);background:var(--surface)}
+.botmic{width:48px;height:48px;background:linear-gradient(135deg,var(--accent),var(--mango));box-shadow:0 6px 16px color-mix(in srgb,var(--mango) 40%,transparent)}
+.botsend{width:48px;height:48px}
+.botfab{width:60px;height:60px;background:linear-gradient(135deg,var(--brand),color-mix(in srgb,var(--brand) 55%,var(--sky)))}
+/* assistant: minimal */
+.botpanel{width:min(370px,calc(100vw - 24px));max-height:min(560px,calc(100dvh - 60px))}
+.bothead{padding:12px 12px 12px 16px}.botttl small{display:none}
+.botbody{gap:10px;padding:12px}
+.bsum{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:16px;background:var(--brand-soft)}
+.bq{display:grid;gap:6px}.bq small{font:700 11px var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 2px 0}
+.bqrow{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
+.bqrow::-webkit-scrollbar{display:none}
+.bqrow .bchip{flex:none;scroll-snap-align:start}
+.bqrow .bchip.dish{width:84px;padding:10px 4px}
+.bchip.ask{padding:10px 14px;border-radius:99px;background:var(--surface);font-size:13px}
+.bmk{padding:8px 12px}
+.bstat{font-size:14px}
+.botnote{display:none!important}
+/* photos in lists */
+.lart{position:relative}
+.lart .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+/* graphic page headers */
+.shophead,.fhero{position:relative;overflow:hidden;padding:24px 26px;border-radius:30px 30px 30px 8px;background:linear-gradient(120deg,var(--leaf-soft),var(--sky-soft) 55%,var(--mango-soft));border:1px solid var(--line)}
+.shophead:after,.fhero:after{content:"🥬  🍅  🥕";position:absolute;right:18px;top:50%;transform:translateY(-50%) rotate(-6deg);font-size:46px;letter-spacing:6px;opacity:.28;pointer-events:none;white-space:nowrap}
+.shophead>*,.fhero>*{position:relative;z-index:1}
+@media (max-width:720px){.shophead:after,.fhero:after{font-size:30px;opacity:.2}.shophead,.fhero{padding:18px}}
+/* ===== sign-in / register pages and buttons, redesigned ===== */
+/* buttons everywhere */
+.btn{border-radius:16px;font-weight:700;letter-spacing:.01em;padding:12px 20px;background:linear-gradient(135deg,var(--leaf),var(--brand));color:var(--brand-ink);box-shadow:0 8px 20px color-mix(in srgb,var(--brand) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.28);border:0}
+.btn:hover{filter:brightness(1.08);transform:translateY(-2px);box-shadow:0 12px 26px color-mix(in srgb,var(--brand) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.28)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.ghost{background:color-mix(in srgb,var(--surface) 88%,transparent);color:var(--ink);border:1.5px solid var(--line);box-shadow:0 2px 6px rgba(19,40,28,.06)}
+.btn.ghost:hover{background:var(--brand-soft);border-color:var(--brand);color:var(--brand);filter:none;box-shadow:0 6px 16px rgba(19,40,28,.1)}
+.btn.accent{background:linear-gradient(135deg,var(--accent),var(--mango));color:var(--accent-ink);box-shadow:0 8px 20px color-mix(in srgb,var(--mango) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.4)}
+.btn.danger{background:var(--bad-soft);color:var(--bad);box-shadow:none;border:1.5px solid transparent}
+.btn.danger:hover{border-color:var(--bad);filter:none;box-shadow:none}
+.btn.sm{border-radius:12px;padding:8px 14px}
+.btn:disabled{background:var(--surface2);color:var(--muted);box-shadow:none;transform:none}
+.cta .btn{background:linear-gradient(135deg,var(--accent),var(--mango));color:var(--accent-ink)}
+.link{transition:color .2s}
+/* auth layout: one rounded card, colourful panel + clean form */
+.authgrid,.portal{gap:0!important;max-width:1020px;margin:14px auto 0;background:var(--surface);border:1px solid var(--line);border-radius:36px 36px 36px 10px;overflow:hidden;box-shadow:0 30px 70px rgba(19,40,28,.16)}
+.authgrid .authside{align-self:stretch;position:relative;padding:clamp(28px,4vw,48px);color:#fff;background:radial-gradient(circle at 15% 12%,rgba(255,255,255,.2) 0 90px,transparent 91px),radial-gradient(circle at 90% 92%,rgba(242,181,29,.45) 0 150px,transparent 151px),linear-gradient(150deg,var(--brand),color-mix(in srgb,var(--brand) 45%,var(--sky)))}
+.authside .eyebrow{color:var(--accent)}
+.authside h2{color:#fff}
+.authside .perk .em{background:rgba(255,255,255,.18);backdrop-filter:blur(6px)}
+.authside .perk strong{color:#fff}.authside .perk span{color:rgba(255,255,255,.8)}
+.authgrid .authcard,.portal .authcard{max-width:none;border:0;border-radius:0;box-shadow:none;background:transparent;padding:clamp(24px,4vw,46px)}
+.portal .fp{border-radius:0;align-self:stretch}
+.authcard .ftabs{display:grid;grid-template-columns:1fr 1fr;width:100%;padding:5px;border-radius:18px;background:var(--surface2);margin-bottom:22px}
+.authcard .ftabs button{justify-content:center;padding:12px;border-radius:14px;font-size:15px;transition:all .25s}
+.authcard .ftabs button.on{background:linear-gradient(135deg,var(--leaf),var(--brand));color:var(--brand-ink);box-shadow:0 6px 14px color-mix(in srgb,var(--brand) 30%,transparent)}
+.authcard .field label{font-size:11.5px;color:var(--brand)}
+.authcard .field input,.authcard .field select,.authcard .field textarea{padding:14px 15px;border:1.5px solid transparent;background:var(--surface2);border-radius:16px;font-size:15px}
+.authcard .field input:focus,.authcard .field select:focus{background:var(--surface);border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 16%,transparent)}
+.authcard .pwtoggle{background:var(--surface);border-radius:10px;padding:6px 11px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.authcard #authSubmit{padding:16px 20px;font-size:16px;border-radius:18px}
+.authcard #authSubmit:after{content:"";}
+.authcard .mact{margin-top:22px}
+.authcard .chk input{accent-color:var(--brand)}
+.authcard .note{border-radius:14px}
+.authcard .swap{border-top:1px dashed var(--line);margin-top:26px;padding-top:20px}
+.authcard .swap .btn{white-space:nowrap}
+.authcard h3{font-size:26px}
+@media (max-width:980px){.authgrid,.portal{border-radius:28px 28px 28px 8px;max-width:560px}.portal .fp{order:2}}
+@media (max-width:720px){.authgrid,.portal{margin-top:6px;box-shadow:0 14px 36px rgba(19,40,28,.14)}.authcard #authSubmit{padding:15px}}
+/* ===== sign-in / register + buttons: full redesign ===== */
+/* buttons: chunky pill with a pressed-edge look */
+.btn{border-radius:99px;padding:13px 24px;font-weight:750;letter-spacing:.02em;background:linear-gradient(180deg,color-mix(in srgb,var(--leaf) 88%,#fff),var(--brand));box-shadow:0 5px 0 color-mix(in srgb,var(--brand) 62%,#000),0 12px 22px color-mix(in srgb,var(--brand) 32%,transparent),inset 0 1px 0 rgba(255,255,255,.35);transform:translateY(0);transition:transform .15s,box-shadow .15s,filter .2s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 color-mix(in srgb,var(--brand) 62%,#000),0 16px 26px color-mix(in srgb,var(--brand) 38%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 color-mix(in srgb,var(--brand) 62%,#000),0 4px 8px color-mix(in srgb,var(--brand) 25%,transparent)}
+.btn.sm{padding:8px 16px;box-shadow:0 3px 0 color-mix(in srgb,var(--brand) 62%,#000),0 8px 14px color-mix(in srgb,var(--brand) 25%,transparent);border-radius:99px}
+.btn.sm:active{transform:translateY(2px);box-shadow:0 1px 0 color-mix(in srgb,var(--brand) 62%,#000)}
+.btn.ghost{background:var(--surface);color:var(--brand);border:2px solid color-mix(in srgb,var(--brand) 35%,var(--line));box-shadow:0 4px 0 color-mix(in srgb,var(--brand) 18%,var(--line))}
+.btn.ghost:hover{background:var(--brand-soft);box-shadow:0 6px 0 color-mix(in srgb,var(--brand) 22%,var(--line))}
+.btn.ghost:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.btn.accent,.cta .btn{background:linear-gradient(180deg,#ffd36a,var(--accent));color:var(--accent-ink);box-shadow:0 5px 0 color-mix(in srgb,var(--mango) 70%,#000),0 12px 22px color-mix(in srgb,var(--mango) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.danger{box-shadow:0 4px 0 color-mix(in srgb,var(--bad) 30%,transparent)}
+.btn:disabled{box-shadow:none;transform:none}
+.btn:after{display:none}
+#authSubmit{width:100%;padding:17px 24px;font-size:17px;gap:10px}
+#authSubmit:after{display:inline-block!important;position:static!important;content:"→"!important;width:auto!important;height:auto!important;background:none!important;transform:none!important;transition:transform .25s!important;font-size:20px}
+#authSubmit:hover:after{transform:translateX(6px)!important}
+/* side panel */
+.authgrid{max-width:1080px}
+.authgrid .authside{overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.authside:before{content:"";position:absolute;left:-10%;right:-10%;bottom:-2px;height:120px;background:radial-gradient(ellipse at 30% 100%,rgba(255,255,255,.18) 0 55%,transparent 56%),radial-gradient(ellipse at 75% 100%,rgba(255,255,255,.12) 0 55%,transparent 56%)}
+.authside .af{position:absolute;font-style:normal;font-size:44px;opacity:.9;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));animation:fcbob 6s ease-in-out infinite}
+.af.a1{right:9%;top:8%}.af.a2{right:22%;bottom:12%;animation-delay:-2s}.af.a3{left:8%;bottom:8%;animation-delay:-3.5s}.af.a4{right:6%;top:46%;animation-delay:-1s}
+.authside>*:not(.af){position:relative;z-index:1}
+.authside .perk{padding:12px 14px;border-radius:20px 20px 20px 6px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.18)}
+/* form card header */
+.ahead{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.ahead .aem{display:grid;place-items:center;width:58px;height:58px;flex:none;font-size:30px;border-radius:20px 20px 20px 6px;background:linear-gradient(135deg,var(--lime-soft),var(--mango-soft));box-shadow:0 6px 16px rgba(19,40,28,.12);animation:fcbob 5s ease-in-out infinite}
+.ahead h3{margin:0;font-size:28px;line-height:1.05;background:linear-gradient(90deg,var(--ink) 30%,var(--brand));-webkit-background-clip:text;background-clip:text;color:transparent}
+.ahead small{color:var(--muted);font-size:13.5px;line-height:1.35;display:block;margin-top:3px}
+.authcard>h3{display:none}
+.authcard .ftabs{padding:6px;border-radius:99px}
+.authcard .ftabs button{border-radius:99px}
+.authcard .field input,.authcard .field select,.authcard .field textarea{border-radius:99px;padding:15px 20px}
+.authcard .field textarea{border-radius:20px}
+.authcard .field label{padding-left:6px}
+.authlinks{margin-top:4px}
+.authcard .swap{background:linear-gradient(100deg,var(--mango-soft),var(--lime-soft));border:0;border-radius:22px 22px 22px 6px;padding:16px;margin-top:24px}
+/* phones: the colourful header returns above the form */
+@media (max-width:980px){
+  .authgrid,.portal{margin:6px 0 0;border-radius:30px 30px 30px 8px}
+  .authgrid .authcard{position:relative;padding:92px 20px 24px}
+  .portal .authcard{padding:24px 20px}
+  .authgrid .authcard:before{content:"🍅 🥕 🌽 🥬 🍋";position:absolute;left:0;right:0;top:0;height:76px;display:grid;place-items:center;font-size:30px;letter-spacing:8px;background:linear-gradient(135deg,var(--brand),color-mix(in srgb,var(--brand) 40%,var(--sky)));border-radius:30px 30px 0 0;color:#fff}
+  .authgrid .authcard:after{content:"";position:absolute;left:0;right:0;top:56px;height:30px;background:var(--surface);border-radius:50% 50% 0 0/100% 100% 0 0}
+  .ahead{margin-top:-6px}
+  .ahead h3{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){.authside .af,.ahead .aem{animation:none}}
+/* dark mode: logo keeps its tile background like the other top-bar items */
+.top .brand .ic{background:linear-gradient(135deg,var(--leaf),var(--brand))!important;color:#fff!important;box-shadow:0 4px 12px color-mix(in srgb,var(--brand) 40%,transparent)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top .brand .ic{background:linear-gradient(135deg,var(--leaf),#1c6b3e)!important;color:#fff!important}}
+:root[data-theme="dark"] .top .brand .ic{background:linear-gradient(135deg,var(--leaf),#1c6b3e)!important;color:#fff!important}
+/* sign-in info boxes: transparent */
+.ahead .aem{background:transparent!important;box-shadow:none!important}
+.authside .perk{background:transparent!important;border:0!important;backdrop-filter:none!important;padding:6px 0!important}
+.authside .perk .em{background:transparent!important;backdrop-filter:none!important}
+.authcard .note:not([role="alert"]){background:transparent!important}
+.authcard .swap{background:transparent!important;border:1px dashed var(--line)!important}
+/* fixes: top bar width/overflow, dark-mode bar, stray background emoji, cookie vs assistant */
+.top .topin{max-width:1264px;gap:8px;padding-left:12px;padding-right:12px}
+.top .nav button{padding-left:10px;padding-right:10px}
+.top .topr{gap:8px;flex-shrink:0}
+.top .nav{min-width:0}
+@media (min-width:721px) and (max-width:1180px){.top .topin{flex-wrap:wrap;height:auto!important;padding-block:8px;row-gap:4px}.top .nav{order:3;width:100%;margin-left:0;overflow-x:auto}.top .nav button{flex:none}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .top .topin{background:color-mix(in srgb,var(--surface) 92%,transparent);border-color:color-mix(in srgb,var(--brand) 35%,var(--line));box-shadow:0 10px 30px rgba(0,0,0,.45)}}
+:root[data-theme="dark"] .top .topin{background:color-mix(in srgb,var(--surface) 92%,transparent);border-color:color-mix(in srgb,var(--brand) 35%,var(--line));box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.fcbg .fx{display:none}
+@media (max-width:720px){.cookie{padding-right:84px}}
+@media (max-width:980px){.authgrid .authside{display:none!important}}
+/* card art fixes: badge size/position, heart size, emoji centring */
+.card.pc .art{font-size:15px}
+.card.pc .art .pbadge{position:absolute;top:12px;left:12px;right:auto;font:700 11.5px/1.2 var(--f-body);padding:5px 11px;animation:none;z-index:3;margin:0;height:auto}
+.card.pc .art .heart{font-size:16px;top:12px;right:12px;left:auto}
+.card.pc .art .heart .ic{width:20px;height:20px}
+.card.pc .art .em{display:block;line-height:1;margin:0;font-size:72px}
+@media (max-width:720px){.card.pc .art .em{font-size:60px}.card.pc .art .pbadge{font-size:10.5px;padding:4px 8px;top:8px;left:8px}.card.pc .art .heart{top:8px;right:8px;width:34px;height:34px}}
+/* equal-height cards, buttons pinned to the bottom */
+.grid{align-items:stretch}
+.card.pc{display:flex;flex-direction:column;height:100%}
+.card.pc .cbody{flex:1;display:flex;flex-direction:column}
+.card.pc .buyrow{margin-top:auto;padding-top:8px}
+/* sign-in: single centred card */
+.authgrid{display:block!important;max-width:520px!important}
+.authgrid .authcard{padding:clamp(24px,4vw,40px)!important}
+@media (max-width:980px){.authgrid .authcard{padding:92px 20px 24px!important}}
+/* illustrations */
+.vart{width:92px;height:92px;display:block;filter:drop-shadow(0 10px 8px rgba(0,0,0,.22))}
+.card.pc .art .em{display:grid;place-items:center}
+@media (max-width:720px){.vart{width:70px;height:70px}}
+</style>
 
 <div id="app"></div>
 <div class="scrim" id="scrim" data-a="closeAll"></div>
@@ -919,7 +1302,7 @@ function histChart(days,sample){
    '<text x="'+(pl-6)+'" y="'+(Y(hi)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(hi)+'</text><text x="'+(pl-6)+'" y="'+(Y(lo)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(lo)+'</text>'+
    '<text x="'+pl+'" y="'+(H-6)+'" class="ht">'+dl(first.day)+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" class="ht" text-anchor="end">'+dl(last.day)+'</text>'+
    '<polyline points="'+line('city')+'" class="hcity"/><polyline points="'+line('market')+'" class="hmk"/></svg>'+
-   '<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>'+(sample?'<p class="muted" style="font-size:12px;margin:6px 0 0">Sample history for this preview, not real prices.</p>':'')+'</figure>';
+   '<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>'+''+'</figure>';
 }
 function farmKey(p){return p.ownerId?String(p.ownerId):'s:'+p.farmer}
 var SEEDFARM={'Ramesh Farm':{owner:'Ramesh',area:'Anekal',grow:'Tomato, beans, brinjal',since:'2004',story:'A family plot near Anekal. Vegetables are picked in the morning and brought to the market the same day.'},'Lakshmi Farms':{owner:'Lakshmi',area:'Kanakapura Road',grow:'Greens, drumstick, gourds',since:'2011',story:'Lakshmi grows leafy greens and gourds with farmyard manure, and sells directly to the same regular shoppers each week.'},'Green Valley Farm':{owner:'Suresh',area:'Doddaballapur',grow:'Carrot, beetroot, cabbage',since:'1998',story:'Three generations of growers. Root vegetables are washed and sorted by hand.'},'Basava Organics':{owner:'Basavaraj',area:'Kolar',grow:'Millets, ragi, pulses',since:'2016',story:'Small-batch millets and pulses grown without chemical sprays.'},'Gowda Agro':{owner:'Gowda',area:'Mandya',grow:'Banana, sugarcane, coconut',since:'1992',story:'Bananas and coconuts from the Mandya belt, cut when ordered.'},'Kaveri Growers':{owner:'Meena',area:'Kaveri belt',grow:'Chilli, onion, garlic',since:'2009',story:'A group of five neighbouring farms selling together.'},'Nandi Hills Orchards':{owner:'Prakash',area:'Nandi Hills',grow:'Grapes, strawberry, guava',since:'2001',story:'Hill orchards. Fruit is picked ripe and packed in small trays.'},'Mandya Fresh':{owner:'Kumar',area:'Mandya',grow:'Maize, sweet corn, gourds',since:'2013',story:'Fresh corn and gourds, harvested at dawn.'},'Anekal Organics':{owner:'Divya',area:'Anekal',grow:'Herbs, spinach, coriander',since:'2018',story:'A small organic plot supplying herbs and greens.'},'Hosur Road Farms':{owner:'Vijay',area:'Hosur Road',grow:'Papaya, pomegranate, lime',since:'2007',story:'Fruit farm on the Hosur belt.'},'Devanahalli Growers':{owner:'Narayan',area:'Devanahalli',grow:'Amaranth, dill, fenugreek',since:'2010',story:'Leafy greens grown close to the city, so they reach you quickly.'},'Kolar Harvest':{owner:'Anitha',area:'Kolar',grow:'Tomato, mango, potato',since:'2000',story:'Kolar is known for tomatoes and mangoes. This farm sells both.'},'Doddaballapur Greens':{owner:'Shivu',area:'Doddaballapur',grow:'Cabbage, cauliflower, peas',since:'2012',story:'Cool-season vegetables from the north of the city.'},'Magadi Naturals':{owner:'Roopa',area:'Magadi',grow:'Curry leaves, moringa, beans',since:'2015',story:'Curry leaves and moringa from a small natural farm.'}};
@@ -959,7 +1342,7 @@ function boardHTML(m){
    col('b1','Fresh today','Stock confirmed by the seller this morning.',fresh.slice(0,5).map(function(p){return sellerRow(p,'<span class="bx">'+esc(freshLabel(p).replace('Confirmed today, ',''))+'</span>')}),'No seller has confirmed stock yet today.')+
    col('b2','Cheaper than last week','Compared with about a week ago.',dn.slice(0,5).map(function(x){return sellerRow(x.p,'<span class="trend dn">▼ '+Math.round(-x.t*100)+'%</span>')}),noHist?'Trends appear after a week of seller updates.':'No big drops this week.')+
    col('b3','Costlier than last week','Worth planning around.',up.slice(0,5).map(function(x){return sellerRow(x.p,'<span class="trend up">▲ '+Math.round(x.t*100)+'%</span>')}),noHist?'Trends appear after a week of seller updates.':'No big rises this week.')+
-   '</div>'+(LIVE?'':'<p class="muted bnote">Prices, times and trends in this preview are samples.</p>')+'</section>';
+   '</div>'+''+'</section>';
 }
 function shrinkPhoto(file,max,q){
   return new Promise(function(res,rej){
@@ -1269,7 +1652,7 @@ function header(){
   }
   right+='<button class="icon langbtn" data-a="lang" aria-label="Language: English or Kannada" title="English / ಕನ್ನಡ">'+(S.lang==='kn'?'EN':'ಕ')+'</button>';
   right+='<button class="icon hide-m" data-a="theme" aria-label="Toggle dark mode">'+ic('moon')+'</button>';
-  return '<a class="skip" href="#main-content" data-a="skip">Skip to content</a>'+(SITE.demo?'<div class="demobar" role="note">Preview version: accounts, listings and orders are saved on this device only and are not sent to sellers yet.</div>':'')+
+  return '<a class="skip" href="#main-content" data-a="skip">Skip to content</a>'+''+
    '<header class="top"><div class="wrap topin"><button class="brand" data-a="home" aria-label="FarmConnect home">'+ic('leaf')+'<span>FarmConnect</span></button>'+nav+'<div class="topr">'+right+'</div></div></header>'+
    (!area?'<div class="tabbar"><div class="wrap"><button class="'+(home?'on':'')+'" data-a="home">'+ic('store')+'Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search">'+ic('search')+'Find</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders">'+ic('box')+'Orders<span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button><button data-a="openCart">'+ic('bag')+'Basket<span class="pill-n" data-count="cart2" '+(n?'':'hidden')+'>'+n+'</span></button><button class="'+((v==='account'||v==='auth')?'on':'')+'" data-a="'+(a&&a.role==='farmer'?'myprofile':'nav')+'" data-v="'+(a&&a.role==='customer'?'account':'auth')+'" data-t="login">'+ic('user')+(a?'Account':'Sign in')+'</button></div></div>':'');
 }
@@ -1285,7 +1668,7 @@ function updateBadges(){
 function pwField(id,name,label,auto,hint){
   return '<div class="field"><label for="'+id+'">'+label+'</label><div class="pwrow"><input id="'+id+'" name="'+name+'" type="password" autocomplete="'+auto+'" required><button type="button" class="pwtoggle" data-a="showpw" data-t="'+id+'" aria-label="Show password">Show</button></div>'+(hint?'<small>'+hint+'</small>':'')+'</div>';
 }
-function previewNote(){return SITE.demo?'<div class="note" style="background:var(--surface2);color:var(--muted);margin-top:14px">Preview: your account is saved on this device only. Do not reuse a password from another site.</div>':''}
+function previewNote(){return ''}
 
 /* ---------- customer sign in and register ---------- */
 function authView(){
@@ -1300,7 +1683,7 @@ function authView(){
     pwField('rPass','password','Password','new-password','At least 8 characters, with letters and a number.')+pwField('rConfirm','confirm','Confirm password','new-password')+
     '<label class="chk full"><input type="checkbox" id="rTerms" name="terms"><span>I agree to the <button type="button" class="link" data-a="legal" data-p="terms">terms of use</button> and <button type="button" class="link" data-a="legal" data-p="privacy">privacy notice</button>.</span></label></div>'+
     '<div id="authErr" class="note" role="alert" hidden></div><div class="mact" style="justify-content:stretch"><button id="authSubmit" class="btn" type="submit" style="flex:1">Create account</button></div></form>';
-  return '<div class="wrap view"><div class="authgrid"><div class="authside"><div class="eyebrow">Your FarmConnect account</div><h2>'+(tab==='login'?'Welcome back.':'Fresh produce, one account.')+'</h2><div class="perks"><div class="perk"><span class="em">🧺</span><div><strong>Order in a few taps</strong><span>Your details fill in at checkout.</span></div></div><div class="perk"><span class="em">📦</span><div><strong>Follow every order</strong><span>See when the seller accepts, packs and hands it over.</span></div></div><div class="perk"><span class="em">⭐</span><div><strong>Rate what you buy</strong><span>Help neighbours pick the best produce.</span></div></div></div></div>'+
+  return '<div class="wrap view"><div class="authgrid">'+
    '<div class="panel authcard">'+banner+'<div class="ftabs" role="tablist"><button class="'+(tab==='login'?'on':'')+'" role="tab" aria-selected="'+(tab==='login')+'" data-a="atab" data-t="login">Sign in</button><button class="'+(tab==='register'?'on':'')+'" role="tab" aria-selected="'+(tab==='register')+'" data-a="atab" data-t="register">Create account</button></div>'+(tab==='login'?login:reg)+previewNote()+
    '<div class="swap"><span><b>Selling produce?</b> Farmers have their own portal and Farmer ID.</span><button class="btn ghost sm" data-a="fportal" data-t="login">Farmer portal '+ic('right')+'</button></div></div></div></div>';
 }
@@ -1432,8 +1815,9 @@ function offersHTML(){
   var so=S.ui.gsort;
   list.sort(function(a,b){return so==='price'?a.p.price-b.p.price:so==='name'?a.p.name.localeCompare(b.p.name)||a.d-b.d:a.d-b.d});
   if(!list.length)return '<div class="empty"><div class="big">🔎</div><h3>No produce matches</h3><p>Try a different word, such as “tomato” or “banana”, or another type.</p></div>';
+  setTimeout(loadImgs,0);
   return '<p class="muted" style="margin-bottom:12px;font-size:13px">'+list.length+' listing'+(list.length===1?'':'s')+(list.length>60?', showing the first 60':'')+'</p><div class="olistx">'+list.slice(0,60).map(function(x){
-    var p=x.p;return '<div class="orow" data-pid="'+p.id+'"><div class="lart">'+esc(p.emoji||'🌱')+'</div><div style="min-width:0"><strong>'+esc(p.name)+' '+ratingLine(p)+'</strong><small>'+esc(p.farmer)+'</small><small>'+ic('pin')+' '+esc(x.m?x.m.name:'Market')+' · '+x.d.toFixed(1)+' km</small></div><div class="oprice"><div class="price" style="font-size:20px">'+money(p.price)+'<small> / '+esc(p.unit)+'</small></div><button class="link" data-a="cmp" data-id="'+p.id+'">Details</button></div><div class="obuy buy">'+buyControl(p)+'</div></div>';
+    var p=x.p;return '<div class="orow" data-pid="'+p.id+'"><div class="lart">'+(imgOf(p)?'<img class="pimg" alt="" src="'+esc(imgOf(p))+'">':'')+esc(p.emoji||'🌱')+'</div><div style="min-width:0"><strong>'+esc(p.name)+' '+ratingLine(p)+'</strong><small>'+esc(p.farmer)+'</small><small>'+ic('pin')+' '+esc(x.m?x.m.name:'Market')+' · '+x.d.toFixed(1)+' km</small></div><div class="oprice"><div class="price" style="font-size:20px">'+money(p.price)+'<small> / '+esc(p.unit)+'</small></div><button class="link" data-a="cmp" data-id="'+p.id+'">Details</button></div><div class="obuy buy">'+buyControl(p)+'</div></div>';
   }).join('')+'</div>';
 }
 function searchView(){
@@ -1514,6 +1898,7 @@ function gridHTML(anim){
     return a.name.localeCompare(b.name);
   });
   if(!arr.length)return '<div class="empty"><div class="big">🧺</div><h3>Nothing matches</h3><p>'+(S.ui.favOnly?'Tap the heart on a product to save it here.':'Try another search or category.')+'</p></div>';
+  setTimeout(loadImgs,0);
   return arr.map(function(p,i){return card(p,anim?i:null)}).join('');
 }
 function buyControl(p){
@@ -1529,10 +1914,83 @@ function saveLine(p){
   if(d<0)return '<div class="save bad">Online is '+money(-d)+' cheaper / '+esc(p.unit)+'</div>';
   return '<div class="save" style="background:var(--surface2);color:var(--muted)">Same price as online</div>';
 }
+/* real photos: looked up from Wikipedia by produce name (cached on this device); the emoji stays as the fallback */
+var WT={'tomato':'Tomato','fresh tomatoes':'Tomato','cherry tomato':'Cherry tomato','onion':'Onion','country onions':'Onion','potato':'Potato','carrot':'Carrot','organic carrots':'Carrot','beans':'Green bean','tender beans':'Green bean','brinjal':'Eggplant','mattu gulla brinjal':'Eggplant','cabbage':'Cabbage','cauliflower':'Cauliflower','capsicum':'Bell pepper','green chilli':'Chili pepper','dry red chilli':'Chili pepper','cucumber':'Cucumber','ladies finger':'Okra','beetroot':'Beetroot','radish':'Radish','pumpkin':'Pumpkin','bottle gourd':'Calabash','ridge gourd':'Luffa acutangula','bitter gourd':'Momordica charantia','snake gourd':'Trichosanthes cucumerina','ash gourd':'Benincasa hispida','drumstick':'Moringa oleifera','moringa leaves':'Moringa oleifera','sweet corn':'Sweet corn','green peas':'Pea','garlic':'Garlic','ginger':'Ginger','sweet potato':'Sweet potato','raw banana':'Cooking banana','spring onion':'Scallion','button mushroom':'Agaricus bisporus','lemon':'Lemon','broccoli':'Broccoli','cluster beans':'Guar','elephant foot yam':'Amorphophallus paeoniifolius','raw mango':'Mango','totapuri mango':'Mango','knol khol':'Kohlrabi','turnip':'Turnip','zucchini':'Zucchini','red cabbage':'Red cabbage','baby corn':'Baby corn','tindora':'Coccinia grandis','banana flower':'Banana heart','banana stem':'Banana','colocasia':'Taro','spinach':'Spinach','farm fresh spinach':'Spinach','coriander':'Coriander','fresh coriander':'Coriander','mint':'Mentha','curry leaves':'Curry tree','fenugreek leaves':'Fenugreek','dill leaves':'Dill','amaranth leaves':'Amaranth','lettuce':'Lettuce','basil':'Basil','robusta banana':'Banana','nendran bananas':'Banana','yelakki banana':'Banana','apple':'Apple','orange':'Orange (fruit)','sweet lime':'Citrus limetta','grapes':'Grape','papaya':'Papaya','watermelon':'Watermelon','muskmelon':'Cantaloupe','pineapple':'Pineapple','sapota':'Sapodilla','custard apple':'Custard apple','jackfruit':'Jackfruit','strawberry':'Strawberry','pear':'Pear','kiwi':'Kiwifruit','dragon fruit':'Pitaya','fig':'Common fig','plum':'Plum','cherries':'Cherry','amla':'Phyllanthus emblica','jamun':'Syzygium cumini','dry coconut':'Coconut','tender coconut':'Coconut','allahabad guava':'Guava','pomegranate':'Pomegranate','jowar':'Sorghum bicolor','urad dal':'Vigna mungo','idli rice':'Rice','sona masoori rice':'Rice','rava':'Semolina','poha':'Flattened rice','wheat atta':'Atta','bajra':'Pearl millet','foxtail millet':'Foxtail millet','toor dal':'Pigeon pea','moong dal':'Mung bean','horse gram':'Macrotyloma uniflorum','premium ragi':'Finger millet','ragi':'Finger millet','groundnuts':'Peanut','wild honey':'Honey','turmeric':'Turmeric','sesame seeds':'Sesame','tamarind':'Tamarind','jaggery blocks':'Jaggery'};
+var PHOTO_DIR='produce/'; /* put your photos here: produce/<name>.jpg (see produce/produce-list.csv) */
+var LOCALP={},LOCALQ={};
+function pslug(x){return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+function localKeys(p){var a=[pslug(p.name),pslug(imgTitle(p.name))];return a.filter(function(v,i){return v&&a.indexOf(v)===i})}
+function localOf(p){var k=localKeys(p);for(var i=0;i<k.length;i++)if(LOCALP[k[i]])return LOCALP[k[i]];return ''}
+function localProbe(p,done){
+  var keys=localKeys(p),ex=['jpg','jpeg','png','webp'],list=[];
+  keys.forEach(function(k){ex.forEach(function(e){list.push([k,PHOTO_DIR+k+'.'+e])})});
+  (function next(i){
+    if(i>=list.length){keys.forEach(function(k){if(LOCALP[k]===undefined)LOCALP[k]=''});return done()}
+    var im=new Image();im.onload=function(){LOCALP[list[i][0]]=list[i][1];keys.forEach(function(k){if(LOCALP[k]===undefined)LOCALP[k]=list[i][1]});done()};im.onerror=function(){next(i+1)};im.src=list[i][1];
+  })(0);
+}
+var IMGC=store.get('imgs',{}),IMGQ=[],IMGB=0,IMGF={};
+function imgTitle(n){var k=String(n||'').toLowerCase().trim();return WT[k]||String(n||'').trim()}
+function imgOf(p){return p.photo||localOf(p)||IMGC[imgTitle(p.name)]||''}
+function imgSet(el,url){
+  var art=el.querySelector('.art')||el.querySelector('.lart');if(!art||art.querySelector('.pimg')||!url)return;
+  var im=new Image();im.className='pimg';im.alt='';im.loading='lazy';im.decoding='async';
+  im.onload=function(){art.classList.add('hasimg');var em=art.querySelector('.em');if(em)em.style.display='none'};
+  im.onerror=function(){im.remove();var t=el.dataset.pid&&prod(el.dataset.pid);if(t){IMGC[imgTitle(t.name)]='';store.set('imgs',IMGC)}};
+  im.src=url;art.insertBefore(im,art.firstChild);
+}
+function imgPump(){
+  while(IMGB<4&&IMGQ.length){
+    var t=IMGQ.shift();IMGB++;
+    (function(t){
+      fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(t.replace(/ /g,'_')),{headers:{Accept:'application/json'}}).then(function(r){return r.ok?r.json():null}).then(function(j){
+        var u=j&&((j.thumbnail&&j.thumbnail.source)||(j.originalimage&&j.originalimage.source))||'';
+        if(u)return u;
+        return fetch('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=pageimages&piprop=thumbnail&pithumbsize=500&generator=search&gsrlimit=1&gsrsearch='+encodeURIComponent(t+' food'),{}).then(function(r){return r.ok?r.json():null}).then(function(q){var pg=q&&q.query&&q.query.pages;if(!pg)return '';var k=Object.keys(pg)[0];return (pg[k]&&pg[k].thumbnail&&pg[k].thumbnail.source)||''});
+      }).then(function(u){IMGC[t]=u||'';store.set('imgs',IMGC)}).catch(function(){IMGC[t]=''}).then(function(){IMGB--;delete IMGF[t];loadImgs();imgPump()});
+    })(t);
+  }
+}
+function loadImgs(){
+  [].forEach.call(document.querySelectorAll('.card.pc[data-pid],.orow[data-pid]'),function(el){
+    var p=prod(el.dataset.pid);if(!p||p.photo)return;var t=imgTitle(p.name);
+    var lk=localKeys(p)[0],lo=localOf(p);
+    if(lo){imgSet(el,lo);return}
+    if(LOCALP[lk]===undefined){if(!LOCALQ[lk]){LOCALQ[lk]=1;localProbe(p,loadImgs)}return}
+    if(IMGC[t])imgSet(el,IMGC[t]);
+    else if(IMGC[t]===undefined&&!IMGF[t]){IMGF[t]=1;IMGQ.push(t)}
+  });
+  imgPump();
+}
+
+/* original vector illustrations used when no photo is available */
+var ART={
+ banana:'<path d="M18 30C22 62 52 84 86 70C90 68 90 64 86 63C60 66 40 52 34 28C33 24 28 22 24 24C20 25 18 27 18 30Z" fill="#f6d33b"/><path d="M24 24C30 20 36 22 36 28" fill="none" stroke="#7a5a1a" stroke-width="4" stroke-linecap="round"/><path d="M34 30C42 54 60 62 84 66" fill="none" stroke="#d9a91c" stroke-width="2.5" stroke-linecap="round"/><path d="M86 66l4-2" stroke="#5b4210" stroke-width="4" stroke-linecap="round"/>',
+ tomato:'<circle cx="50" cy="56" r="32" fill="#e0452f"/><ellipse cx="40" cy="44" rx="9" ry="6" fill="#fff" opacity=".28"/><path d="M50 26l-9 7-10-2 8 8-8 6 11-1 8 6 8-6 11 1-8-6 8-8-10 2z" fill="#3f9a45"/>',
+ apple:'<path d="M50 30C38 20 14 30 18 58C21 80 38 90 50 84C62 90 79 80 82 58C86 30 62 20 50 30Z" fill="#d93b3b"/><ellipse cx="36" cy="50" rx="7" ry="11" fill="#fff" opacity=".25"/><path d="M50 32C50 24 52 18 57 14" stroke="#5b3a1a" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M54 22C62 14 74 16 76 22C68 28 58 28 54 22Z" fill="#4aa04f"/>',
+ orange:'<circle cx="50" cy="55" r="33" fill="#f4922b"/><ellipse cx="38" cy="43" rx="9" ry="6" fill="#fff" opacity=".28"/><path d="M50 22c-2-6 0-10 5-12M50 22c8-5 18-3 20 2-8 6-16 6-20-2z" fill="#4aa04f" stroke="none"/>',
+ lemon:'<ellipse cx="50" cy="55" rx="36" ry="27" fill="#f2dc3c" transform="rotate(-20 50 55)"/><ellipse cx="38" cy="46" rx="9" ry="5" fill="#fff" opacity=".35" transform="rotate(-20 38 46)"/><path d="M80 38l8-6" stroke="#8a7a1e" stroke-width="4" stroke-linecap="round"/>',
+ carrot:'<path d="M60 26C74 30 82 38 80 46L30 90C26 92 14 82 16 76L56 24Z" fill="#f08a24" transform="rotate(-8 50 55)"/><path d="M38 60l10 6M30 72l9 5M52 46l9 5" stroke="#c96a12" stroke-width="2.5" stroke-linecap="round"/><path d="M70 28C66 14 72 8 80 6M72 30C80 20 90 22 94 28M68 30C60 22 56 14 60 8" stroke="#3f9a45" stroke-width="6" stroke-linecap="round" fill="none"/>',
+ onion:'<path d="M50 14C54 28 82 38 82 62C82 82 66 90 50 90C34 90 18 82 18 62C18 38 46 28 50 14Z" fill="#c76bb0"/><path d="M50 22C40 40 34 62 40 88M50 22C60 40 66 62 60 88" stroke="#a24d8f" stroke-width="3" fill="none"/><path d="M50 14c-2-6 0-8 3-10" stroke="#8a6a2a" stroke-width="4" stroke-linecap="round"/>',
+ potato:'<path d="M20 52C20 30 48 22 70 28C88 34 92 56 82 72C72 88 40 90 28 78C22 72 20 62 20 52Z" fill="#c9a064"/><circle cx="40" cy="48" r="2.5" fill="#8b6a38"/><circle cx="62" cy="40" r="2.5" fill="#8b6a38"/><circle cx="58" cy="68" r="2.5" fill="#8b6a38"/><circle cx="34" cy="66" r="2" fill="#8b6a38"/>',
+ brinjal:'<path d="M70 20C88 28 86 54 66 74C50 90 24 92 18 82C14 72 30 60 42 46C52 34 56 20 70 20Z" fill="#6b3a8a"/><ellipse cx="46" cy="56" rx="4" ry="10" fill="#fff" opacity=".2" transform="rotate(40 46 56)"/><path d="M62 18C60 28 74 28 76 20C72 14 66 14 62 18Z" fill="#3f9a45"/>',
+ chilli:'<path d="M26 30C30 22 40 24 46 32C58 50 76 66 90 70C84 80 62 84 46 70C32 58 22 44 26 30Z" fill="#d33a2c"/><path d="M26 30C24 22 28 16 34 14" stroke="#3f9a45" stroke-width="5" stroke-linecap="round" fill="none"/><ellipse cx="42" cy="40" rx="3" ry="7" fill="#fff" opacity=".25" transform="rotate(-30 42 40)"/>',
+ leaf:'<path d="M50 90V40" stroke="#2f7d3a" stroke-width="5" stroke-linecap="round"/><path d="M50 52C28 52 16 36 18 18C38 18 52 30 50 52Z" fill="#4aa04f"/><path d="M50 62C72 62 84 46 82 28C62 28 48 40 50 62Z" fill="#3f9a45"/><path d="M50 40C40 30 36 24 36 14C46 16 54 26 50 40Z" fill="#6bbf5e"/>',
+ cabbage:'<circle cx="50" cy="54" r="34" fill="#7cc36a"/><path d="M50 22C40 38 40 70 50 86M50 22C60 38 60 70 50 86M22 50C40 56 60 56 78 50" stroke="#4f9a47" stroke-width="3" fill="none"/>',
+ grapes:'<g fill="#7b4aa8"><circle cx="38" cy="40" r="10"/><circle cx="58" cy="40" r="10"/><circle cx="28" cy="58" r="10"/><circle cx="48" cy="58" r="10"/><circle cx="68" cy="58" r="10"/><circle cx="38" cy="76" r="10"/><circle cx="58" cy="76" r="10"/><circle cx="48" cy="90" r="8"/></g><path d="M48 30C48 20 54 14 62 12" stroke="#5b3a1a" stroke-width="4" stroke-linecap="round" fill="none"/>',
+ mango:'<path d="M26 40C30 20 60 14 76 30C92 46 84 78 60 86C38 92 20 70 26 40Z" fill="#f3a21f"/><path d="M60 22C76 28 86 46 80 66" fill="none" stroke="#e8553a" stroke-width="10" opacity=".4" stroke-linecap="round"/><path d="M52 18C54 12 60 10 66 12" stroke="#4aa04f" stroke-width="5" stroke-linecap="round" fill="none"/>',
+ cucumber:'<rect x="12" y="38" width="76" height="26" rx="13" fill="#3f9a45" transform="rotate(-24 50 51)"/><path d="M30 60l4-4M46 52l4-4M62 44l4-4M40 66l4-4" stroke="#8fd27d" stroke-width="3" stroke-linecap="round"/>',
+ peas:'<path d="M14 58C30 30 70 30 88 52C70 72 32 78 14 58Z" fill="#6bbf5e"/><g fill="#3f9a45"><circle cx="34" cy="54" r="7"/><circle cx="50" cy="52" r="7"/><circle cx="66" cy="52" r="7"/></g>'
+};
+var ARTK=[['banana','banana'],['tomato','tomato'],['apple','apple'],['pomegranate','apple'],['orange','orange'],['sweet lime','lemon'],['lemon','lemon'],['lime','lemon'],['carrot','carrot'],['onion','onion'],['potato','potato'],['brinjal','brinjal'],['eggplant','brinjal'],['chilli','chilli'],['grape','grapes'],['mango','mango'],['cucumber','cucumber'],['gourd','cucumber'],['beans','peas'],['peas','peas'],['cabbage','cabbage'],['cauliflower','cabbage'],['spinach','leaf'],['coriander','leaf'],['mint','leaf'],['leaves','leaf'],['lettuce','leaf'],['amaranth','leaf'],['dill','leaf']];
+function artOf(n){n=String(n||'').toLowerCase();for(var i=0;i<ARTK.length;i++)if(n.indexOf(ARTK[i][0])>-1)return '<svg class="vart" viewBox="0 0 100 100" aria-hidden="true">'+ART[ARTK[i][1]]+'</svg>';return ''}
 function card(p,i){
-  var st=p.qty<=0?'<div class="stock out">Sold out</div>':p.qty<=5?'<div class="stock low">Only '+fq(p.qty)+' '+esc(p.unit)+' left</div>':'<div class="stock">In stock · '+fq(p.qty)+' '+esc(p.unit)+'</div>';
-  return '<article class="card'+(i!==null?' enter':'')+'" data-pid="'+p.id+'" '+(i!==null?'style="--i:'+i+'"':'')+'><div class="art" style="--c:'+catCol(p)+'">'+(p.photo?'<img class="pimg" loading="lazy" alt="'+esc(p.name)+'" src="'+esc(p.photo)+'">':'<span>'+esc(p.emoji||'🌱')+'</span>')+'<button class="heart '+(S.favs.indexOf(p.id)>-1?'on':'')+'" data-a="fav" data-id="'+p.id+'" aria-label="Save to favourites">'+ic('heart')+'</button></div>'+
-   '<div class="cbody">'+st+'<div class="fresh '+(isFresh(p)?'ok':'old')+'">'+esc(freshLabel(p))+'</div><h4>'+esc(p.name)+'</h4>'+ratingLine(p)+'<div class="price">'+money(p.price)+'<small> / '+esc(p.unit)+'</small></div>'+trendHTML(p)+saveLine(p)+'<div class="by">By <button class="flink" data-a="farmer" data-k="'+esc(farmKey(p))+'">'+esc(p.farmer)+'</button>'+(p.fssai?' · FSSAI '+esc(p.fssai):'')+'</div><div class="buyrow"><button class="link" data-a="cmp" data-id="'+p.id+'">Compare</button><span class="buy">'+buyControl(p)+'</span></div></div></article>';
+  var badge=p.qty<=0?'<span class="pbadge out">Sold out</span>':p.qty<=5?'<span class="pbadge low">Only '+fq(p.qty)+' '+esc(p.unit)+' left</span>':'<span class="pbadge ok">In stock · '+fq(p.qty)+' '+esc(p.unit)+'</span>';
+  return '<article class="card pc'+(i!==null?' enter':'')+'" data-pid="'+p.id+'" '+(i!==null?'style="--i:'+i+'"':'')+'><div class="art'+(imgOf(p)?' hasimg':'')+'" style="--c:'+catCol(p)+'">'+(imgOf(p)?'<img class="pimg" loading="lazy" alt="'+esc(p.name)+'" src="'+esc(imgOf(p))+'" onerror="var a=this.parentNode,e=a.querySelector(\'.em\');this.remove();a.classList.remove(\'hasimg\');if(e)e.style.display=\'\'">':'')+'<span class="em"'+(imgOf(p)?' style="display:none"':'')+'>'+(artOf(p.name)||esc(p.emoji||'🌱'))+'</span>'+badge+'<button class="heart '+(S.favs.indexOf(p.id)>-1?'on':'')+'" data-a="fav" data-id="'+p.id+'" aria-label="Save to favourites">'+ic('heart')+'</button></div>'+
+   '<div class="cbody"><div class="fresh '+(isFresh(p)?'ok':'old')+'"><i class="fdot '+(isFresh(p)?'ok':'old')+'"></i>'+esc(freshLabel(p))+'</div><h4>'+esc(p.name)+' '+ratingLine(p)+'</h4>'+
+   '<div class="prow2"><div class="price">'+money(p.price)+'<small> / '+esc(p.unit)+'</small></div>'+trendHTML(p)+'</div>'+saveLine(p)+
+   '<div class="by">By <button class="flink" data-a="farmer" data-k="'+esc(farmKey(p))+'">'+esc(p.farmer)+'</button>'+(p.fssai?' · FSSAI '+esc(p.fssai):'')+'</div>'+
+   '<div class="buyrow"><button class="link cmpbtn" data-a="cmp" data-id="'+p.id+'">'+ic('search')+' Compare</button><span class="buy">'+buyControl(p)+'</span></div></div></article>';
 }
 function updateCard(id){
   var el=document.querySelector('[data-pid="'+id+'"]');var p=prod(id);if(!el||!p)return;
@@ -1619,7 +2077,7 @@ function openPay(id){
   if(LIVE){apiCall('POST','/api/orders/'+id+'/pay',{}).then(function(j){L.pay(id,j.payment)}).catch(function(e){toast(e.message,true);L.refresh().catch(function(){})});return}
   var banks=['State Bank of India','HDFC Bank','ICICI Bank','Axis Bank','Kotak Mahindra Bank','Canara Bank','Bank of Baroda'].map(function(b){return '<option>'+b+'</option>'}).join('');
   openModal('<div class="paysheet"><div class="phead"><div><small>FarmConnect</small><strong>Order '+esc(o.ref)+'</strong></div><div class="pamt mono">'+money(o.total)+'</div></div>'+
-   (SITE.demo?'<div class="note" style="margin:0 0 14px;background:var(--surface2);color:var(--muted)">Practice payment sheet. No money moves. In the live site this is Razorpay Checkout.</div>':'')+
+   ''+
    '<div class="ptabs" role="tablist" aria-label="Payment method"><button type="button" role="tab" class="on" aria-selected="true" data-a="paytab" data-t="upi">UPI</button><button type="button" role="tab" aria-selected="false" data-a="paytab" data-t="card">Card</button><button type="button" role="tab" aria-selected="false" data-a="paytab" data-t="net">Netbanking</button></div>'+
    '<form data-form="pay" novalidate><input type="hidden" name="oid" value="'+esc(o.id)+'"><input type="hidden" name="method" value="upi">'+
    '<div data-pane="upi" class="field"><label for="pUpi">UPI ID</label><input id="pUpi" name="upi" autocomplete="off" placeholder="name@okbank" inputmode="email"></div>'+
@@ -1728,7 +2186,7 @@ function render(keepScroll){
   else if(v==='auth')m=isCustomer()?accountView():authView();
   else if(v==='page')m=pageView();
   else m=marketsView();
-  $('#app').innerHTML=h+'<main id="main-content" tabindex="-1">'+m+'</main>'+footer();
+  $('#app').innerHTML=h+'<main id="main-content" tabindex="-1">'+m+'</main>'+((S.ui.role!=='farmer'&&['shop','checkout','orders','search','account','auth','page'].indexOf(v)<0)?footer():'');
   try{document.title=titleFor()}catch(e){}
   if(!keepScroll){window.scrollTo(0,0);if(rendered){var mm=$('#main-content');if(mm&&mm.focus)try{mm.focus({preventScroll:true})}catch(e){}}}
   rendered=true;
@@ -3036,7 +3494,7 @@ function botRun(m,needs,dishes){
     botSay('Your basket has items from '+(old?old.name:'another market')+'. Start a new basket for '+m.name+'?');return;
   }
   BOT.confirm=null;BOT.queued=null;BOT.askMarket=false;
-  var rep=botApply(m,needs);BOT.lastKeys=rep.keys;BOT.price=null;BOT.card=null;botRender();
+  var rep=botApply(m,needs);BOT.lastKeys=rep.keys;if(rep.added.length||rep.choose.length)BOT.tab='basket';BOT.price=null;BOT.card=null;botRender();
   botSay(botSummary(m,rep,dishes));
 }
 /* ----- price questions: the same numbers as the information board and the Compare view ----- */
@@ -3099,7 +3557,7 @@ function botPrice(P,text,pi){
     if(want==='up'||want==='both')seg(upl,'costlier','up');
     if(sp.length)say=sp.join('. ')+'.';
     else say=noHist?'Price trends appear after a week of seller updates'+where+'.':'No item'+where+' has changed much in price since last week.';
-    if(rows2.length)card={title:want==='down'?'Cheaper than last week':want==='up'?'Costlier than last week':'Price changes since last week',sub:m.name+(LIVE?'':' · sample trends in this preview'),mode:'trend',rows:rows2};
+    if(rows2.length)card={title:want==='down'?'Cheaper than last week':want==='up'?'Costlier than last week':'Price changes since last week',sub:m.name,mode:'trend',rows:rows2};
   }
   BOT.price=card;BOT.card=null;
   botRender();botSay(say);
@@ -3320,9 +3778,11 @@ function botRender(light){
     var oh=openNow(m);
     h+='<div class="bmk">'+ic('pin')+'<span><b>'+esc(m.name)+'</b><small>'+(oh?(oh.open?'Open now · ':'May be closed now · ')+esc(oh.txt):esc(m.area||''))+'</small></span><button class="link" data-a="botMarket" data-id="">Change</button></div>';
   }
-  h+=priceHTML()+cardHTML()+botListHTML();
-  h+='<div class="bgrp"><h5>Ask about prices</h5><div class="bchips">'+['What got cheaper than last week?','What got costlier than last week?','Compare with online prices'].map(function(q){return '<button class="bchip" data-a="botAsk" data-q="'+esc(q)+'">'+esc(q)+'</button>'}).join('')+'</div><p class="muted" style="margin-top:8px">Or say: <i>apple price last week and this week</i>, <i>compare tomato with online</i>.</p></div>';
-  h+='<div class="bgrp cook"><h5>What are you cooking?</h5><p class="muted">Tap a dish and I add everything it needs.</p><div class="bchips">'+DISHES.map(function(d){return '<button class="bchip" data-a="botDish" data-n="'+esc(d.n)+'">'+d.em+' '+esc(d.n)+'</button>'}).join('')+'</div></div>';
+  h+=priceHTML()+cardHTML();
+  var nb=cartExtra(),cnt=nb.items.filter(function(l){return l.g&&prod(l.id)}).length+nb.pending.length;
+  if(cnt)h+='<div class="bsum"><span>🧺 <b>'+cnt+'</b> item'+(cnt===1?'':'s')+(m?' · '+esc(m.name):'')+'</span><button class="btn sm" data-a="botBasket">Open basket</button></div>';
+  h+='<div class="bq"><small>Try a dish</small><div class="bqrow">'+DISHES.slice(0,10).map(function(d){return '<button class="bchip dish" data-a="botDish" data-n="'+esc(d.n)+'"><span>'+d.em+'</span><b>'+esc(d.n)+'</b></button>'}).join('')+'</div>'+
+   '<small>Or ask</small><div class="bqrow">'+['What got cheaper than last week?','Compare with online prices'].map(function(q){return '<button class="bchip ask" data-a="botAsk" data-q="'+esc(q)+'">'+esc(q.replace('What got cheaper than last week?','💰 Cheaper this week').replace('Compare with online prices','🛒 Compare online'))+'</button>'}).join('')+'</div></div>';
   var b=$('#botBody');if(b){var st=b.scrollTop;b.innerHTML=h;b.scrollTop=st}
 }
 A.botOpen=function(){
@@ -3340,6 +3800,7 @@ A.botLang=function(d){
   BOT.status=d.l==='hi'?'अब हिन्दी में बोलिए, जैसे: मुझे केला चाहिए':d.l==='kn'?'ಈಗ ಕನ್ನಡದಲ್ಲಿ ಮಾತನಾಡಿ, ಉದಾ: ನನಗೆ ಬಾಳೆಹಣ್ಣು ಬೇಕು':'Speak in English, for example: I need banana';
   botRender();if(BOT.open&&was)botListen();
 };
+A.botTab=function(d){BOT.tab=d.t;botRender()};
 A.botCardX=function(){BOT.card=null;botRender()};
 A.botTry=function(d){BOT.card=null;botHandle(d.t)};
 A.botYes=function(){var a=BOT.ask;BOT.ask=null;botRender();if(a&&a.yes)a.yes()};
@@ -3412,65 +3873,6 @@ document.addEventListener('visibilitychange',function(){
 });
 setInterval(function(){if(BOT.open&&BOT.mic&&Date.now()-(BOT.act||0)>180000){botStop();BOT.status='The mic paused after a few quiet minutes. Tap the mic to continue.';botRender()}},15000);
 
-/* ---------- Wikipedia/Wikimedia produce photos ----------
-   The site is static-friendly: it first uses a bundled produce image when one
-   exists, otherwise it asks Wikipedia's public REST API for that item's
-   thumbnail. This runs in the browser, so GitHub Pages does not need Node.js.
-   Results are cached in localStorage to avoid repeated requests. */
-(function setupProducePhotos(){
-  var photoMap={};
-  function slug(s){return String(s||'').trim().toLowerCase();}
-  function escUrl(s){return encodeURIComponent(String(s||'').replace(/ /g,'_'));}
-  function applyPhotos(){
-    S.products.forEach(function(p){
-      var key=slug(p.name), meta=photoMap[key];
-      if(meta&&meta.url){p.photo=meta.url;}
-    });
-    document.querySelectorAll('.card[data-pid]').forEach(function(card){
-      var p=prod(card.getAttribute('data-pid'));
-      if(!p||!p.photo)return;
-      var art=card.querySelector('.art');
-      if(art&&!art.querySelector('img.pimg')){
-        var img=document.createElement('img');img.className='pimg';img.loading='lazy';img.alt=p.name;img.src=p.photo;
-        var heart=art.querySelector('.heart');art.insertBefore(img,heart||null);
-        var fallback=img;
-        img.addEventListener('error',function(){fallback.remove();});
-        var span=art.querySelector('span');if(span)span.remove();
-      }
-    });
-  }
-  function cached(){try{return JSON.parse(localStorage.getItem('fcWikiPhotos')||'{}')}catch(e){return {}}}
-  function saveCache(){try{localStorage.setItem('fcWikiPhotos',JSON.stringify(photoMap))}catch(e){}}
-  function loadCatalog(){
-    fetch('produce/catalog.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('catalog');return r.json()}).then(function(cat){
-      var c=cached();Object.keys(c).forEach(function(k){photoMap[k]=c[k]});
-      var wanted={};cat.forEach(function(x){wanted[slug(x.name)]={name:x.name,wiki:x.wikipedia||x.name,image:x.image||''}});
-      S.products.forEach(function(p){if(!wanted[slug(p.name)])wanted[slug(p.name)]={name:p.name,wiki:p.name,image:''};});
-      var keys=Object.keys(wanted).filter(function(k){return !photoMap[k]});
-      var pos=0;
-      function next(){
-        var batch=keys.slice(pos,pos+4);pos+=4;
-        if(!batch.length){saveCache();applyPhotos();return;}
-        Promise.all(batch.map(function(k){
-          var w=wanted[k], local=w.image;
-          /* A real bundled image wins if the file exists; otherwise Wikipedia. */
-          if(local){
-            photoMap[k]={url:local,source:'local'};
-            return Promise.resolve();
-          }
-          var url='https://en.wikipedia.org/api/rest_v1/page/summary/'+escUrl(w.wiki);
-          return fetch(url,{headers:{'Accept':'application/json'}}).then(function(r){return r.ok?r.json():null}).then(function(j){
-            var src=j&&((j.thumbnail&&j.thumbnail.source)||(j.originalimage&&j.originalimage.source));
-            if(src)photoMap[k]={url:src,source:'Wikipedia/Wikimedia Commons'};
-          }).catch(function(){});
-        })).then(function(){setTimeout(next,80)});
-      }
-      next();
-    }).catch(function(){/* keep emoji fallback if catalog/API is unavailable */});
-  }
-  window.addEventListener('load',loadCatalog);
-})();
-
 if(!LIVE)S.cart.items=S.cart.items.filter(function(l){return prod(l.id)});
 if(window.addEventListener)window.addEventListener('popstate',function(e){
   var st=e.state&&e.state.fc;if(!st)return;
@@ -3481,6 +3883,89 @@ setInterval(function(){try{if(expireHolds()){if(!$('#modal').classList.contains(
 try{if(LIVE)L.boot();else render();if(S.lang==='kn'){langPass();langWatch()}}catch(err){
   $('#app').innerHTML='<div class="wrap" style="padding-block:80px;max-width:560px"><h2 style="font-size:34px">Something went wrong</h2><p class="muted" style="margin:12px 0 20px">The saved data on this device could not be read. Resetting it takes you back to a clean start.</p><button class="btn" data-a="hardReset">Reset and reload</button></div>';
 }
+})();
+</script>
+
+<script>
+/* Visual layer: illustrated hero scene, scroll reveal, card tilt, scroll progress. Purely decorative; the app works without it. */
+(function(){
+'use strict';
+var root=document.documentElement,app=document.getElementById('app');
+if(!app||!window.requestAnimationFrame)return;
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+root.classList.add('fc-js');
+
+var rows='';for(var i=0;i<22;i++){var x=40+i*54;rows+='<g class="sway"><path d="M'+x+' 250q-8-22 0-40q8 18 0 40Z" fill="var(--leaf)"/><path d="M'+(x+14)+' 250q-8-16 0-30q8 14 0 30Z" fill="var(--lime)"/></g>'}
+var SCENE='<div class="fcscene" aria-hidden="true"><svg viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice">'+
+ '<circle class="sunglow" cx="980" cy="86" r="74" fill="var(--accent)" opacity=".35"/>'+
+ '<g class="sun"><g stroke="var(--accent)" stroke-width="5" stroke-linecap="round">'+[0,45,90,135,180,225,270,315].map(function(a){return '<line x1="980" y1="86" x2="980" y2="22" transform="rotate('+a+' 980 86)" opacity=".7"/>'}).join('')+'</g></g>'+
+ '<circle cx="980" cy="86" r="38" fill="var(--accent)"/>'+
+ '<g class="cloud" fill="var(--surface)" opacity=".9"><ellipse cx="0" cy="70" rx="46" ry="16"/><ellipse cx="28" cy="58" rx="28" ry="18"/><ellipse cx="-24" cy="62" rx="22" ry="13"/></g>'+
+ '<g class="cloud c2" fill="var(--surface)" opacity=".75"><ellipse cx="0" cy="130" rx="40" ry="12"/><ellipse cx="22" cy="120" rx="24" ry="15"/></g>'+
+ '<g class="cloud c3" fill="var(--surface)" opacity=".8"><ellipse cx="0" cy="38" rx="34" ry="11"/><ellipse cx="18" cy="30" rx="20" ry="13"/></g>'+
+ '<path d="M0 220C150 160 300 175 450 205S760 170 900 190 1120 175 1200 195V300H0Z" fill="var(--leaf-soft)"/>'+
+ '<path d="M0 250C180 205 330 225 520 240S860 215 1010 232 1150 225 1200 235V300H0Z" fill="var(--lime-soft)"/>'+
+ rows+
+ '<path d="M0 262H1200V300H0Z" fill="var(--brand-soft)"/></svg>'+
+ '<span class="fcfloat" style="left:8%;top:34%;animation-delay:-1s">🍅</span><span class="fcfloat hm" style="left:44%;top:12%;animation-delay:-3s">🥕</span><span class="fcfloat" style="right:24%;top:44%;animation-delay:-2s">🍌</span><span class="fcfloat hm" style="right:7%;top:36%;animation-delay:-4s">🥬</span><span class="fcfloat hm" style="left:27%;top:48%;animation-delay:-5s">🌽</span></div>';
+
+/* full-page, left-right symmetric, multi-colour background (one half is drawn, the other is its mirror) */
+var crops='';
+for(var k=0;k<9;k++){var cx=36+k*62,col=['var(--leaf)','var(--lime)','var(--mango)'][k%3];
+  crops+='<g class="sway"><path d="M'+cx+' 742q-9-26 0-46q9 22 0 46Z" fill="'+col+'"/><path d="M'+(cx+16)+' 742q-8-18 0-34q8 16 0 34Z" fill="var(--leaf)" opacity=".8"/>'+(k%3===2?'<circle cx="'+cx+'" cy="694" r="6" fill="var(--tomato)"/>':'')+'</g>';}
+var half='<path d="M0 596C120 536 260 556 380 588S560 616 600 606V800H0Z" fill="var(--leaf-soft)"/>'+
+ '<path d="M0 676C150 628 300 658 420 678S560 698 600 692V800H0Z" fill="var(--lime-soft)"/>'+
+ '<path d="M0 752C140 722 300 742 600 736V800H0Z" fill="var(--leaf)" opacity=".35"/>'+
+ '<circle cx="90" cy="150" r="170" fill="var(--berry-soft)" opacity=".75"/><circle cx="30" cy="430" r="130" fill="var(--sky-soft)" opacity=".9"/>'+
+ '<circle cx="250" cy="70" r="90" fill="var(--lime-soft)"/><circle cx="170" cy="340" r="62" fill="var(--mango-soft)"/><circle cx="330" cy="230" r="44" fill="var(--tomato-soft)" opacity=".8"/>'+
+ '<g class="cloud2" fill="var(--surface)" opacity=".85"><ellipse cx="120" cy="120" rx="56" ry="17"/><ellipse cx="150" cy="106" rx="32" ry="20"/><ellipse cx="92" cy="110" rx="26" ry="14"/></g>'+
+ '<g class="cloud2 b" fill="var(--surface)" opacity=".7"><ellipse cx="330" cy="190" rx="42" ry="13"/><ellipse cx="352" cy="178" rx="24" ry="15"/></g>'+crops;
+var BG='<div class="fcbg" aria-hidden="true"><svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice"><defs>'+
+ '<linearGradient id="fcsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--sky-soft)"/><stop offset=".5" style="stop-color:var(--mango-soft)"/><stop offset=".78" style="stop-color:var(--leaf-soft)"/></linearGradient>'+
+ '<g id="fchalf">'+half+'</g></defs><rect width="1200" height="800" fill="url(#fcsky)"/>'+
+ '<use href="#fchalf"/><use href="#fchalf" transform="translate(1200 0) scale(-1 1)"/>'+
+ '<path d="M572 800L628 800L614 668L586 668Z" fill="var(--surface)" opacity=".45"/>'+
+ '<circle class="sunglow" cx="600" cy="110" r="96" fill="var(--accent)" opacity=".35"/>'+
+ '<g class="sun"><g stroke="var(--accent)" stroke-width="6" stroke-linecap="round" opacity=".75">'+[0,30,60,90,120,150,180,210,240,270,300,330].map(function(a){return '<line x1="600" y1="110" x2="600" y2="34" transform="rotate('+a+' 600 110)"/>'}).join('')+'</g></g>'+
+ '<circle cx="600" cy="110" r="46" fill="var(--accent)"/></svg>'+
+ [['6%','24%','🍅'],['16%','56%','🥕'],['10%','80%','🌽']].map(function(p,i){return '<span class="fcfloat fx" style="left:'+p[0]+';top:'+p[1]+';animation-delay:-'+(i*1.7)+'s">'+p[2]+'</span><span class="fcfloat fx" style="right:'+p[0]+';top:'+p[1]+';animation-delay:-'+(i*1.7)+'s">'+p[2]+'</span>'}).join('')+'</div>';
+document.body.insertAdjacentHTML('afterbegin',BG);
+
+var io=null;
+if('IntersectionObserver' in window){
+  io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('fc-in');io.unobserve(e.target)}})},{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+}
+function enhance(){
+  var sel='.band,.hstep,.cta,.panel,.ocard,.board,.stat,.fhero,.shophead';
+  [].forEach.call(app.querySelectorAll(sel),function(el,i){
+    if(el.classList.contains('fc-rv')||el.closest('.rise,.view>.hero'))return;
+    el.classList.add('fc-rv');el.style.setProperty('--d',String(i%4));
+    if(io)io.observe(el);else el.classList.add('fc-in');
+  });
+  [].forEach.call(app.querySelectorAll('.stat strong'),function(s){
+    if(s.dataset.fc||!/^\d{1,5}$/.test(s.textContent.trim()))return;s.dataset.fc='1';
+    var to=+s.textContent.trim();if(!to||reduce)return;var t0=performance.now();
+    (function tick(n){var p=Math.min(1,(n-t0)/700);s.textContent=String(Math.round(to*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(tick)})(t0);
+  });
+}
+var q=0;
+function schedule(){if(q)return;q=requestAnimationFrame(function(){q=0;try{enhance()}catch(e){}})}
+new MutationObserver(schedule).observe(app,{childList:true,subtree:true});
+schedule();
+
+/* card tilt */
+if(!reduce&&matchMedia('(hover:hover)').matches){
+  app.addEventListener('mousemove',function(e){
+    var c=e.target.closest&&e.target.closest('.card');if(!c)return;
+    var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    c.style.setProperty('--ry',(x*6).toFixed(2)+'deg');c.style.setProperty('--rx',(-y*6).toFixed(2)+'deg');
+  });
+  app.addEventListener('mouseout',function(e){var c=e.target.closest&&e.target.closest('.card');if(c&&!c.contains(e.relatedTarget)){c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')}});
+}
+/* scroll progress */
+var bar=document.createElement('div');bar.className='fc-prog';bar.setAttribute('aria-hidden','true');document.body.appendChild(bar);
+var tk=0;function prog(){if(tk)return;tk=requestAnimationFrame(function(){tk=0;var h=document.documentElement.scrollHeight-innerHeight;document.documentElement.classList.toggle('fc-scrolled',scrollY>24);bar.style.transform='scaleX('+(h>0?Math.min(1,scrollY/h):0)+')'})}
+addEventListener('scroll',prog,{passive:true});prog();
 })();
 </script>
 
