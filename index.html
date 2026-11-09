@@ -417,7 +417,7 @@ textarea.copybox{width:100%;min-height:150px;padding:12px;border:1px solid var(-
 .shopactions{display:flex;gap:8px;flex-wrap:wrap}
 @media (max-width:980px){.fcols{grid-template-columns:repeat(2,minmax(0,1fr))}.fbrand{grid-column:1/-1}.sellgrid{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.stats3{grid-template-columns:repeat(2,minmax(0,1fr))}.sn:nth-child(3){padding-left:0;border-left:0}.sn:nth-child(n+3){border-top:1px solid var(--line)}.hsteps{grid-template-columns:1fr}}
 @media (max-width:720px){
-  .tabbar .wrap{grid-template-columns:repeat(5,1fr)}
+  .tabbar .wrap{grid-template-columns:repeat(6,1fr)}
   .hide-m{display:none}
   .orow{grid-template-columns:48px minmax(0,1fr)}
   .orow .oprice,.orow .obuy{grid-column:2}
@@ -1065,6 +1065,17 @@ html.fc-scrolled .top .topin{height:54px;box-shadow:0 10px 30px rgba(19,40,28,.1
 .vart{width:92px;height:92px;display:block;filter:drop-shadow(0 10px 8px rgba(0,0,0,.22))}
 .card.pc .art .em{display:grid;place-items:center}
 @media (max-width:720px){.vart{width:70px;height:70px}}
+
+/* ---- live mandi prices + forecast ---- */
+.livetag{display:inline-block;font-size:11px;font-weight:700;color:#1f7a54;background:rgba(31,122,84,.12);border-radius:999px;padding:1px 8px;margin-right:4px}
+.mandi{margin:14px 0 4px;padding:12px 14px;border-radius:14px;background:rgba(31,122,84,.1);border:1px solid rgba(31,122,84,.3);font-size:14px;line-height:1.5}
+.fcard{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:16px;background:rgba(242,176,30,.12);border:1px solid rgba(242,176,30,.4);margin-bottom:10px}
+.fcbig{display:flex;flex-direction:column;gap:2px}.fcbig b{font-size:28px;line-height:1.15}.fcbig small{font-size:14px;font-weight:500}
+.fcrow{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:14px}
+.fcline{fill:none;stroke:#e0a21a;stroke-width:2.5;stroke-dasharray:6 5}.fcband{fill:rgba(242,176,30,.22);stroke:none}.fcnow{stroke:currentColor;opacity:.25;stroke-dasharray:3 3}
+.lg.fcl::before{background:#e0a21a}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;padding:4px 10px;background:var(--surface)}.tblwrap .fctab th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.fctab{width:100%;border-collapse:collapse;font-size:14px}.fctab th,.fctab td{text-align:left;padding:6px 4px;border-bottom:1px solid rgba(128,128,128,.25)}
+#fcSel{width:100%}
 </style>
 
 <div id="app"></div>
@@ -1273,7 +1284,143 @@ function freshLabel(p){
   var n=Math.round((istMidnight()-new Date(d+'T00:00:00+05:30').getTime())/86400000);
   return n<=1?'Updated yesterday':'Updated '+n+' days ago';
 }
+/* ---------- daily official mandi prices ----------
+   data/prices.json is rebuilt every day by a GitHub Action (scripts/fetch_prices.py) from the
+   Agmarknet feed on data.gov.in. The site only reads that file; it never holds an API key. */
+var MP={ok:false,items:{},history:{},updated:null,date:'',source:''};
+function mandiName(p){
+  if(!MP.ok)return null;var n=String(p.name).toLowerCase(),best=null;
+  Object.keys(MP.items).forEach(function(k){var kl=k.toLowerCase();
+    if(n.indexOf(kl)>-1||(kl.slice(-1)==='s'&&n.indexOf(kl.slice(0,-1))>-1)){if(!best||k.length>best.length)best=k}});
+  return best;
+}
+function mandiOf(p){
+  var k=mandiName(p);if(!k||p.unit!=='kg')return null;var it=MP.items[k];if(!it)return null;
+  return{key:k,m:it.m,lo:it.lo,hi:it.hi,mk:it.mk,n:it.n,s:it.s,d:it.d};
+}
+function mdate(d){return new Date(d+'T12:00:00+05:30').toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}
+function applyMandi(){
+  if(!MP.ok||LIVE)return;var ch=false;
+  S.products.forEach(function(p){
+    if(p.ownerId)return;var o=mandiOf(p);if(!o)return;
+    var np=Math.max(1,Math.round(o.m*2)/2);
+    if(p.price!==np){
+      if(p.onlineRetailer==='Sample reference price'&&p.onlinePrice>0&&p.price>0)p.onlinePrice=Math.round(p.onlinePrice*np/p.price);
+      p.price=np;ch=true;
+    }
+  });
+  if(ch)save();
+}
+function mandiHist(p){
+  var o=mandiOf(p);if(!o)return null;var h=MP.history[o.key];if(!h)return null;
+  var from=ymd(-29),out=[];
+  h.forEach(function(r){if(r[0]>=from)out.push({day:r[0],market:r[1],city:null,live:true})});
+  return out.length>=3?out:null;
+}
+function forecastOf(key){
+  var h=MP.history[key];if(!h||h.length<7)return null;
+  var pts=h.slice(-21),n=pts.length,t0=new Date(pts[0][0]+'T00:00:00Z').getTime();
+  var xs=pts.map(function(r){return (new Date(r[0]+'T00:00:00Z').getTime()-t0)/864e5}),ys=pts.map(function(r){return r[1]});
+  var mx=xs.reduce(function(a,b){return a+b},0)/n,my=ys.reduce(function(a,b){return a+b},0)/n,sxx=0,sxy=0;
+  xs.forEach(function(x,i){sxx+=(x-mx)*(x-mx);sxy+=(x-mx)*(ys[i]-my)});
+  var b=sxx?sxy/sxx:0,a=my-b*mx,ss=0;
+  ys.forEach(function(y,i){var e=y-(a+b*xs[i]);ss+=e*e});
+  var sd=Math.sqrt(ss/Math.max(1,n-2)),last=ys[n-1],base=0.5*last+0.5*(a+b*xs[n-1]),fut=[],lo=[],hi=[];
+  var band=Math.max(sd,last*0.03);
+  for(var k=1;k<=7;k++){
+    var v=Math.min(last*1.25,Math.max(last*0.75,base+b*k)),w=band*(0.7+0.1*k);
+    fut.push(v);lo.push(Math.max(0.5,v-w));hi.push(v+w);
+  }
+  var end=fut[6],ch=(end-last)/last,dir=ch>0.04?'rising':ch<-0.04?'falling':'steady';
+  return{key:key,last:last,lastDay:pts[n-1][0],pts:pts,fut:fut,lo:lo,hi:hi,end:end,ch:ch,dir:dir,
+    advice:dir==='rising'?'Hold 2 to 3 days if you can store it.':dir==='falling'?'Sell soon, prices are easing.':'Steady. Sell when you are ready.',n:h.length};
+}
+function fcChart(f){
+  var W=320,H=150,pl=40,pr=8,pt=10,pb=24,all=f.pts.map(function(r){return r[1]}).concat(f.lo,f.hi);
+  var lo=Math.min.apply(null,all),hi=Math.max.apply(null,all);if(hi-lo<1){hi+=1;lo=Math.max(0,lo-1)}
+  var nh=f.pts.length,tot=nh+7-1;
+  function X(i){return pl+(W-pl-pr)*(i/tot)}function Y(v){return pt+(H-pt-pb)*(1-(v-lo)/(hi-lo))}
+  var hp=f.pts.map(function(r,i){return X(i).toFixed(1)+','+Y(r[1]).toFixed(1)}).join(' ');
+  var lastX=X(nh-1),lastY=Y(f.last);
+  var fp=lastX.toFixed(1)+','+lastY.toFixed(1)+' '+f.fut.map(function(v,i){return X(nh+i).toFixed(1)+','+Y(v).toFixed(1)}).join(' ');
+  var band=lastX.toFixed(1)+','+lastY.toFixed(1)+' '+f.hi.map(function(v,i){return X(nh+i).toFixed(1)+','+Y(v).toFixed(1)}).join(' ')+' '+f.lo.slice().reverse().map(function(v,i){return X(nh+6-i).toFixed(1)+','+Y(v).toFixed(1)}).join(' ');
+  var alt='Mandi price of '+f.key+' for '+nh+' days, then a 7 day estimate from '+money(f.last)+' to about '+money(f.end)+' per kg.';
+  return '<figure class="hist fc"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(alt)+'">'+
+   '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(hi).toFixed(1)+'" y2="'+Y(hi).toFixed(1)+'" class="hg"/><line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(lo).toFixed(1)+'" y2="'+Y(lo).toFixed(1)+'" class="hg"/>'+
+   '<text x="'+(pl-6)+'" y="'+(Y(hi)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(Math.round(hi*2)/2)+'</text><text x="'+(pl-6)+'" y="'+(Y(lo)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(Math.round(lo*2)/2)+'</text>'+
+   '<line x1="'+lastX.toFixed(1)+'" x2="'+lastX.toFixed(1)+'" y1="'+pt+'" y2="'+(H-pb)+'" class="fcnow"/>'+
+   '<polygon points="'+band+'" class="fcband"/><polyline points="'+hp+'" class="hmk"/><polyline points="'+fp+'" class="fcline"/>'+
+   '<text x="'+pl+'" y="'+(H-6)+'" class="ht">'+new Date(f.pts[0][0]+'T12:00:00+05:30').toLocaleDateString('en-IN',{day:'numeric',month:'short'})+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" class="ht" text-anchor="end">Next 7 days</text></svg>'+
+   '<figcaption><span class="lg mk">Mandi price so far</span><span class="lg fcl">Estimate and range</span></figcaption></figure>';
+}
+function fcHTML(key){
+  var f=forecastOf(key),days=(MP.history[key]||[]).length;
+  if(!f)return '<p class="muted" style="font-size:13px">A forecast needs at least 7 days of official prices. '+esc(key)+' has '+days+' so far, and one more day is added every morning.</p>';
+  var a=Math.round(f.lo[6]*2)/2,b=Math.round(f.hi[6]*2)/2,arrow=f.dir==='rising'?'▲':f.dir==='falling'?'▼':'●';
+  return '<div class="fcard"><div class="fcbig"><span class="muted">Expected in 7 days</span><b class="mono">'+money(a)+' to '+money(b)+' <small>per kg</small></b></div>'+
+   '<div class="fcrow"><span class="trend '+(f.dir==='rising'?'up':f.dir==='falling'?'dn':'')+'">'+arrow+' '+f.dir+'</span><span>'+esc(f.advice)+'</span></div></div>'+fcChart(f)+
+   '<p class="muted" style="font-size:12px">A simple trend estimate from the last '+Math.min(21,f.n)+' days of official mandi prices. It is a range, not a promise. Weather and festivals can move prices quickly.</p>';
+}
+function mandiBlock(p){
+  var o=mandiOf(p);if(!o)return '';
+  var f=forecastOf(o.key),line=f?'<br>Expected next week: <b>'+money(Math.round(f.lo[6]*2)/2)+' to '+money(Math.round(f.hi[6]*2)/2)+'</b> per kg, '+f.dir+'.':'';
+  return '<div class="mandi"><b>Official mandi price today: '+money(o.m)+' per kg</b> <span class="muted">('+money(o.lo)+' to '+money(o.hi)+')</span><br><span class="muted">'+esc(o.mk||o.s)+(o.n>1?' and '+(o.n-1)+' more':'')+' · '+esc(o.s)+' · '+mdate(o.d)+'. Wholesale rate, shop prices are usually higher.</span>'+line+'</div>';
+}
+function sourceLine(){
+  if(!MP.ok||!MP.date)return '';
+  return 'Mandi prices: Agmarknet via data.gov.in, latest data '+mdate(MP.date)+'.';
+}
+function forecastTabHTML(){
+  var keys=Object.keys(MP.items).sort();
+  if(!MP.ok||!keys.length)return '<div class="panel"><h3>Price forecast</h3><p class="muted">Official daily prices have not loaded yet. They appear here once the daily update has run. Check the setup guide if this stays empty.</p></div>';
+  var mine=[];myProducts().forEach(function(p){var k=mandiName(p);if(k&&mine.indexOf(k)<0)mine.push(k)});
+  var cur=S.ui.fc&&MP.items[S.ui.fc]?S.ui.fc:(mine[0]||(MP.items.Tomato?'Tomato':keys[0]));S.ui.fc=cur;
+  var opt=function(k){return '<option '+(k===cur?'selected':'')+'>'+esc(k)+'</option>'};
+  var sel='<select id="fcSel" data-change="fc" aria-label="Crop">'+(mine.length?'<optgroup label="My crops">'+mine.map(opt).join('')+'</optgroup>':'')+'<optgroup label="All crops">'+keys.map(opt).join('')+'</optgroup></select>';
+  var it=MP.items[cur];
+  var rows=myProducts().map(function(p){var o=mandiOf(p);if(!o)return '';return '<tr><td>'+esc(p.name)+'</td><td class="mono">'+money(p.price)+'</td><td class="mono">'+money(o.m)+'</td></tr>'}).join('');
+  return '<div class="two"><div class="panel"><h3>Price forecast</h3><p class="muted" style="font-size:13px">Pick a crop to see where its price is heading.</p><div class="field" style="margin:12px 0">'+sel+'</div>'+
+   '<p style="margin:0 0 8px"><b>'+esc(cur)+'</b> today: <b class="mono">'+money(it.m)+'</b> per kg <span class="muted">('+money(it.lo)+' to '+money(it.hi)+', '+esc(it.mk||it.s)+', '+mdate(it.d)+')</span></p><div id="fcbody">'+fcHTML(cur)+'</div></div>'+
+   '<aside class="panel"><h3>Your prices vs the mandi</h3>'+(rows?'<table class="fctab"><thead><tr><th>Product</th><th>Yours</th><th>Mandi</th></tr></thead><tbody>'+rows+'</tbody></table>':'<p class="muted" style="font-size:13px">Add a product sold by the kg to compare it with today\'s mandi price.</p>')+
+   '<p class="muted" style="font-size:12px;margin-top:12px">'+esc(sourceLine())+' Mandi rates are wholesale, so retail prices are normally higher.</p></aside></div>';
+}
+var BD={ok:false,rows:[],date:'',loading:false};
+function boardUrl(){return (window.FC_PRICE_URL||'data/prices.json').replace('prices.json','board.json')}
+function loadBoard(){
+  if(BD.loading)return;BD.loading=true;
+  fetch(boardUrl()+'?t='+Math.floor(Date.now()/60000),{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+    BD={ok:!!(j&&j.rows&&j.rows.length),rows:(j&&j.rows)||[],date:(j&&j.date)||'',loading:false,done:true};
+    if(S.ui.view==='board')render(true);
+  }).catch(function(){BD.loading=false;BD.done=true;if(S.ui.view==='board')render(true)});
+}
+function boardMarkets(){var o={};BD.rows.forEach(function(r){o[r[2]]=1});return Object.keys(o).sort()}
+function boardRows(){
+  var q=String(S.ui.bq||'').toLowerCase().trim(),m=S.ui.bm||'',rows=BD.rows.filter(function(r){return (!m||r[2]===m)&&(!q||(r[0]+' '+r[1]+' '+r[2]).toLowerCase().indexOf(q)>-1)});
+  if(!rows.length)return '<p class="muted" style="padding:16px 0">Nothing matches. Try another name or market.</p>';
+  return '<div class="tblwrap"><table class="fctab"><thead><tr><th>Item</th><th>Market</th><th>Low</th><th>Modal</th><th>High</th><th>Date</th></tr></thead><tbody>'+rows.slice(0,400).map(function(r){
+    return '<tr><td><b>'+esc(r[0])+'</b>'+(r[1]&&r[1]!=='Other'?' <span class="muted">'+esc(r[1])+'</span>':'')+'</td><td>'+esc(r[2])+'</td><td class="mono">'+money(r[4])+'</td><td class="mono"><b>'+money(r[6])+'</b></td><td class="mono">'+money(r[5])+'</td><td class="muted">'+mdate(r[7])+'</td></tr>'}).join('')+'</tbody></table></div>'+(rows.length>400?'<p class="muted">Showing 400 of '+rows.length+'. Search to narrow down.</p>':'');
+}
+function boardView(){
+  if(!BD.done&&!BD.loading)loadBoard();
+  var head='<div class="eyebrow">Official prices</div><h2>Mandi prices across Bengaluru</h2>';
+  if(!BD.ok)return '<div class="wrap view">'+head+'<div class="panel"><p class="muted">'+(BD.done?'The daily price list has not been published yet. It appears here after the first daily update.':'Loading prices')+'</p></div></div>';
+  var mk=boardMarkets(),items={};BD.rows.forEach(function(r){items[r[0]]=1});
+  return '<div class="wrap view">'+head+'<p class="muted">'+Object.keys(items).length+' items in '+mk.length+' Bengaluru markets. Latest data '+mdate(BD.date)+'. Rupees per kg, wholesale. Shop prices are usually higher.</p>'+
+   '<div class="fgrid" style="margin:14px 0"><div class="field"><label for="bq">Search item</label><input id="bq" type="search" placeholder="Tomato, onion, mango" value="'+esc(S.ui.bq||'')+'" autocomplete="off"></div><div class="field"><label for="bm">Market</label><select id="bm" data-change="bm"><option value="">All Bengaluru markets</option>'+mk.map(function(x){return '<option'+(x===S.ui.bm?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select></div></div>'+
+   '<div id="bres">'+boardRows()+'</div><p class="muted" style="font-size:12px;margin-top:12px">Source: Agmarknet, Ministry of Agriculture and Farmers Welfare, via data.gov.in.</p></div>';
+}
+document.addEventListener('input',function(e){var t=e.target;if(t&&t.id==='bq'){S.ui.bq=t.value;var b=$('#bres');if(b)b.innerHTML=boardRows()}});
+function loadMandi(){
+  try{
+    fetch((window.FC_PRICE_URL||'data/prices.json')+'?t='+Math.floor(Date.now()/60000),{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+      if(!j||!j.items||!Object.keys(j.items).length)return;
+      MP={ok:true,items:j.items,history:j.history||{},updated:j.updated,date:j.date||'',source:j.source||''};
+      applyMandi();if(!$('#modal.on'))render(true);
+    }).catch(function(){});
+  }catch(e){}
+}
 function histSeries(p){
+  var lv=mandiHist(p);if(lv)return lv;
   var h=hsh('h|'+String(p.name).toLowerCase()+'|'+p.marketId),a=(h%628)/100,b=((h>>4)%628)/100,amp=0.05+(h%8)/100,dr=((h>>8)%21-10)/100,out=[];
   function cm(x){return Math.sin(a+x*5.2)*amp+dr*x}
   function cc(x){return Math.sin(b+x*4.1)*amp*0.7+dr*0.5*x}
@@ -1281,9 +1428,9 @@ function histSeries(p){
     out.push({day:ymd(-i),market:Math.max(1,Math.round(p.price*(1+cm(x)-cm(1))*2)/2),city:Math.max(1,Math.round(p.price*(1.03+cc(x)-cc(1))*2)/2)})}
   out[29].market=p.price;return out;
 }
-function was7(p){if(LIVE)return p.was7==null?null:Number(p.was7);return histSeries(p)[22].market}
+function was7(p){if(LIVE)return p.was7==null?null:Number(p.was7);var lv=mandiHist(p);if(lv){var tg=ymd(-7),w=null;lv.forEach(function(r){if(r.day<=tg)w=r.market});if(w==null&&lv.length>=5)w=lv[0].market;var cu=lv[lv.length-1].market;return(w==null||!(cu>0))?null:Math.round(p.price*w/cu*2)/2}return histSeries(p)[22].market}
 function trendOf(p){var w=was7(p);if(!w||!(p.price>0))return null;var pc=(p.price-w)/w;return Math.abs(pc)<0.03?null:pc}
-function trendHTML(p){var t=trendOf(p);if(t==null)return '';var up=t>0;return '<span class="trend '+(up?'up':'dn')+'" title="Compared with about a week ago">'+(up?'▲ ':'▼ ')+Math.round(Math.abs(t)*100)+'% this week</span>'}
+function trendHTML(p){var lv=(!p.ownerId&&mandiOf(p))?'<span class="livetag" title="Official mandi price, '+mdate(mandiOf(p).d)+'">● live</span> ':'';var t=trendOf(p);if(t==null)return lv;var up=t>0;return lv+'<span class="trend '+(up?'up':'dn')+'" title="Compared with about a week ago">'+(up?'▲ ':'▼ ')+Math.round(Math.abs(t)*100)+'% this week</span>'}
 function histChart(days,sample){
   var pts=(days||[]).filter(function(d){return d.market!=null||d.city!=null});
   if(pts.length<3)return '<p class="muted" style="font-size:13px">Price history builds up as sellers update their prices. Check back in a few days.</p>';
@@ -1301,8 +1448,8 @@ function histChart(days,sample){
    '<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(hi).toFixed(1)+'" y2="'+Y(hi).toFixed(1)+'" class="hg"/><line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(lo).toFixed(1)+'" y2="'+Y(lo).toFixed(1)+'" class="hg"/>'+
    '<text x="'+(pl-6)+'" y="'+(Y(hi)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(hi)+'</text><text x="'+(pl-6)+'" y="'+(Y(lo)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(lo)+'</text>'+
    '<text x="'+pl+'" y="'+(H-6)+'" class="ht">'+dl(first.day)+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" class="ht" text-anchor="end">'+dl(last.day)+'</text>'+
-   '<polyline points="'+line('city')+'" class="hcity"/><polyline points="'+line('market')+'" class="hmk"/></svg>'+
-   '<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>'+''+'</figure>';
+   (pts[0].live?'':'<polyline points="'+line('city')+'" class="hcity"/>')+'<polyline points="'+line('market')+'" class="hmk"/></svg>'+
+   (pts[0].live?'<figcaption><span class="lg mk">Official mandi price, rupees per kg</span></figcaption>':'<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>')+'</figure>';
 }
 function farmKey(p){return p.ownerId?String(p.ownerId):'s:'+p.farmer}
 var SEEDFARM={'Ramesh Farm':{owner:'Ramesh',area:'Anekal',grow:'Tomato, beans, brinjal',since:'2004',story:'A family plot near Anekal. Vegetables are picked in the morning and brought to the market the same day.'},'Lakshmi Farms':{owner:'Lakshmi',area:'Kanakapura Road',grow:'Greens, drumstick, gourds',since:'2011',story:'Lakshmi grows leafy greens and gourds with farmyard manure, and sells directly to the same regular shoppers each week.'},'Green Valley Farm':{owner:'Suresh',area:'Doddaballapur',grow:'Carrot, beetroot, cabbage',since:'1998',story:'Three generations of growers. Root vegetables are washed and sorted by hand.'},'Basava Organics':{owner:'Basavaraj',area:'Kolar',grow:'Millets, ragi, pulses',since:'2016',story:'Small-batch millets and pulses grown without chemical sprays.'},'Gowda Agro':{owner:'Gowda',area:'Mandya',grow:'Banana, sugarcane, coconut',since:'1992',story:'Bananas and coconuts from the Mandya belt, cut when ordered.'},'Kaveri Growers':{owner:'Meena',area:'Kaveri belt',grow:'Chilli, onion, garlic',since:'2009',story:'A group of five neighbouring farms selling together.'},'Nandi Hills Orchards':{owner:'Prakash',area:'Nandi Hills',grow:'Grapes, strawberry, guava',since:'2001',story:'Hill orchards. Fruit is picked ripe and packed in small trays.'},'Mandya Fresh':{owner:'Kumar',area:'Mandya',grow:'Maize, sweet corn, gourds',since:'2013',story:'Fresh corn and gourds, harvested at dawn.'},'Anekal Organics':{owner:'Divya',area:'Anekal',grow:'Herbs, spinach, coriander',since:'2018',story:'A small organic plot supplying herbs and greens.'},'Hosur Road Farms':{owner:'Vijay',area:'Hosur Road',grow:'Papaya, pomegranate, lime',since:'2007',story:'Fruit farm on the Hosur belt.'},'Devanahalli Growers':{owner:'Narayan',area:'Devanahalli',grow:'Amaranth, dill, fenugreek',since:'2010',story:'Leafy greens grown close to the city, so they reach you quickly.'},'Kolar Harvest':{owner:'Anitha',area:'Kolar',grow:'Tomato, mango, potato',since:'2000',story:'Kolar is known for tomatoes and mangoes. This farm sells both.'},'Doddaballapur Greens':{owner:'Shivu',area:'Doddaballapur',grow:'Cabbage, cauliflower, peas',since:'2012',story:'Cool-season vegetables from the north of the city.'},'Magadi Naturals':{owner:'Roopa',area:'Magadi',grow:'Curry leaves, moringa, beans',since:'2015',story:'Curry leaves and moringa from a small natural farm.'}};
@@ -1639,7 +1786,7 @@ function header(){
   if(area){
     nav='<nav class="nav" aria-label="Main"><button data-a="home">'+ic('store')+' Storefront</button><button class="on" aria-current="page">'+ic('leaf')+' '+(inWs?'Seller workspace':'Farmer portal')+'</button></nav>';
   }else{
-    nav='<nav class="nav" aria-label="Main"><button class="'+(home?'on':'')+'" data-a="home"'+(home?' aria-current="page"':'')+'>'+ic('store')+' Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search"'+(v==='search'?' aria-current="page"':'')+'>'+ic('search')+' Find produce</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders"'+(v==='orders'?' aria-current="page"':'')+'>'+ic('box')+' My orders <span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button>'+
+    nav='<nav class="nav" aria-label="Main"><button class="'+(home?'on':'')+'" data-a="home"'+(home?' aria-current="page"':'')+'>'+ic('store')+' Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search"'+(v==='search'?' aria-current="page"':'')+'>'+ic('search')+' Find produce</button><button class="'+(v==='board'?'on':'')+'" data-a="nav" data-v="board"'+(v==='board'?' aria-current="page"':'')+'>'+ic('chart')+' Mandi prices</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders"'+(v==='orders'?' aria-current="page"':'')+'>'+ic('box')+' My orders <span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button>'+
       (isFarmer()?'<button data-a="workspace">'+ic('leaf')+' Seller workspace <span class="pill-n" data-count="farmer" '+(nf?'':'hidden')+'>'+nf+'</span></button>':'<button data-a="fportal" data-t="login">'+ic('leaf')+' For farmers</button>')+'</nav>';
   }
   var right='';
@@ -1654,7 +1801,7 @@ function header(){
   right+='<button class="icon hide-m" data-a="theme" aria-label="Toggle dark mode">'+ic('moon')+'</button>';
   return '<a class="skip" href="#main-content" data-a="skip">Skip to content</a>'+''+
    '<header class="top"><div class="wrap topin"><button class="brand" data-a="home" aria-label="FarmConnect home">'+ic('leaf')+'<span>FarmConnect</span></button>'+nav+'<div class="topr">'+right+'</div></div></header>'+
-   (!area?'<div class="tabbar"><div class="wrap"><button class="'+(home?'on':'')+'" data-a="home">'+ic('store')+'Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search">'+ic('search')+'Find</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders">'+ic('box')+'Orders<span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button><button data-a="openCart">'+ic('bag')+'Basket<span class="pill-n" data-count="cart2" '+(n?'':'hidden')+'>'+n+'</span></button><button class="'+((v==='account'||v==='auth')?'on':'')+'" data-a="'+(a&&a.role==='farmer'?'myprofile':'nav')+'" data-v="'+(a&&a.role==='customer'?'account':'auth')+'" data-t="login">'+ic('user')+(a?'Account':'Sign in')+'</button></div></div>':'');
+   (!area?'<div class="tabbar"><div class="wrap"><button class="'+(home?'on':'')+'" data-a="home">'+ic('store')+'Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search">'+ic('search')+'Find</button><button class="'+(v==='board'?'on':'')+'" data-a="nav" data-v="board">'+ic('chart')+'Prices</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders">'+ic('box')+'Orders<span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button><button data-a="openCart">'+ic('bag')+'Basket<span class="pill-n" data-count="cart2" '+(n?'':'hidden')+'>'+n+'</span></button><button class="'+((v==='account'||v==='auth')?'on':'')+'" data-a="'+(a&&a.role==='farmer'?'myprofile':'nav')+'" data-v="'+(a&&a.role==='customer'?'account':'auth')+'" data-t="login">'+ic('user')+(a?'Account':'Sign in')+'</button></div></div>':'');
 }
 function updateBadges(){
   var n=cartCount(),a=myOrders().filter(function(o){return ['awaiting','new','accepted','ready'].indexOf(o.status)>-1}).length,f=newRequests();
@@ -1725,8 +1872,8 @@ function farmerView(){
   var nNew=os.filter(function(x){return x.status==='new'}).length,nProg=os.filter(function(x){return x.status==='accepted'||x.status==='ready'}).length;
   var sales=os.filter(function(x){return x.status==='done'}).reduce(function(s,x){return s+x.total},0);
   var low=mine.filter(function(p){return p.qty<=5}).length;
-  var tabs=[['requests','Requests',nNew],['bring','Bring list',0],['products','Products',0],['add',S.ui.editId?'Edit product':'Add product',0],['markets','Markets',0],['profile','Profile',0]];
-  var body=S.ui.ftab==='requests'?requestsHTML():S.ui.ftab==='bring'?bringHTML():S.ui.ftab==='products'?productsHTML():S.ui.ftab==='add'?productFormHTML():S.ui.ftab==='profile'?profileHTML():marketsAdminHTML();
+  var tabs=[['requests','Requests',nNew],['bring','Bring list',0],['products','Products',0],['forecast','Forecast',0],['add',S.ui.editId?'Edit product':'Add product',0],['markets','Markets',0],['profile','Profile',0]];
+  var body=S.ui.ftab==='requests'?requestsHTML():S.ui.ftab==='bring'?bringHTML():S.ui.ftab==='products'?productsHTML():S.ui.ftab==='forecast'?forecastTabHTML():S.ui.ftab==='add'?productFormHTML():S.ui.ftab==='profile'?profileHTML():marketsAdminHTML();
   var pend=LIVE&&a.status==='pending'?'<div class="note" style="background:var(--warn-soft);color:var(--warn);margin-bottom:16px">Your seller account is waiting for approval. You can add products now. Customers see them once we approve your account, usually within a day.</div>':'';
   return '<div class="wrap view">'+pend+confirmBanner()+'<div class="fhero"><div><div class="eyebrow">Seller workspace</div><h2 style="margin-top:8px">'+esc(fm.farm||'Your farm')+'</h2><div class="fid"><span class="muted">Farmer ID</span> <b class="mono">'+esc(a.loginId)+'</b> <button class="link" data-a="copyText" data-t="'+esc(a.loginId)+'">Copy</button></div></div><button class="btn accent" data-a="addNew">'+ic('plus')+' Add a product</button></div>'+
    '<div class="stats"><div class="stat '+(nNew?'hot':'')+'"><small>New requests</small><strong>'+nNew+'</strong></div><div class="stat"><small>In progress</small><strong>'+nProg+'</strong></div><div class="stat"><small>Completed sales</small><strong>'+money(sales)+'</strong></div><div class="stat"><small>Low or sold out</small><strong>'+low+'</strong></div></div>'+
@@ -1866,7 +2013,7 @@ function pageView(){
 /* ---------- footer ---------- */
 function footer(){
   function pl(p,t){return '<button data-a="nav" data-v="page" data-p="'+p+'">'+t+'</button>'}
-  return '<footer class="foot"><div class="wrap"><div class="fcols"><div class="fbrand"><button class="brand" data-a="home" aria-label="FarmConnect home">'+ic('leaf')+'<span style="display:inline">FarmConnect</span></button><p class="muted">Fresh produce from farms and markets near you in '+esc(SITE.city)+'.</p></div>'+
+  return '<footer class="foot"><div class="wrap"><div class="fcols"><div class="fbrand"><button class="brand" data-a="home" aria-label="FarmConnect home">'+ic('leaf')+'<span style="display:inline">FarmConnect</span></button><p class="muted">Fresh produce from farms and markets near you in '+esc(SITE.city)+'.</p>'+(sourceLine()?'<p class="muted" style="font-size:12px;margin-top:8px">'+esc(sourceLine())+'</p>':'')+'</div>'+
    '<div><h4>Shop</h4><div class="fl"><button data-a="home">Markets</button><button data-a="nav" data-v="search">Find produce</button><button data-a="nav" data-v="orders">My orders</button><button data-a="nav" data-v="account">Account</button><button data-a="nav" data-v="auth" data-t="register">Create account</button></div></div>'+
    '<div><h4>Sellers</h4><div class="fl"><button data-a="fportal" data-t="register">Become a seller</button><button data-a="fportal" data-t="login">Farmer login</button></div></div>'+
    '<div><h4>Company</h4><div class="fl">'+pl('about','About')+pl('how','How it works')+pl('faq','Questions')+pl('contact','Contact')+'</div></div>'+
@@ -2182,11 +2329,12 @@ function render(keepScroll){
   else if(v==='checkout')m=isCustomer()?checkoutView():authView();
   else if(v==='orders')m=isCustomer()?ordersView():authView();
   else if(v==='search')m=searchView();
+  else if(v==='board')m=boardView();
   else if(v==='account')m=isCustomer()?accountView():authView();
   else if(v==='auth')m=isCustomer()?accountView():authView();
   else if(v==='page')m=pageView();
   else m=marketsView();
-  $('#app').innerHTML=h+'<main id="main-content" tabindex="-1">'+m+'</main>'+((S.ui.role!=='farmer'&&['shop','checkout','orders','search','account','auth','page'].indexOf(v)<0)?footer():'');
+  $('#app').innerHTML=h+'<main id="main-content" tabindex="-1">'+m+'</main>'+((S.ui.role!=='farmer'&&['shop','checkout','orders','search','account','auth','page','board'].indexOf(v)<0)?footer():'');
   try{document.title=titleFor()}catch(e){}
   if(!keepScroll){window.scrollTo(0,0);if(rendered){var mm=$('#main-content');if(mm&&mm.focus)try{mm.focus({preventScroll:true})}catch(e){}}}
   rendered=true;
@@ -2318,7 +2466,7 @@ var A={
      (has?'<div class="cmpbar"><div class="lab"><span>Online · '+esc(p.onlineRetailer||'Online retailer')+'</span><b class="mono">'+money(o)+'</b></div><div class="track"><div class="fill alt" style="width:'+(o/mx*100)+'%"></div></div></div>':'<p class="muted">No online price has been added for this product.</p>')+'</div>'+
      (has?'<div class="save'+(diff<0?' bad':'')+'" style="font-size:15px;padding:12px 14px">'+(diff>0?'You save '+money(diff)+' per '+esc(p.unit)+' ('+Math.round(diff/o*100)+'% less).':diff<0?'Online is '+money(-diff)+' cheaper per '+esc(p.unit)+'.':'Same price as online.')+'</div>':'')+
      '<p class="muted" style="font-size:12px;margin-top:12px">'+(p.onlineRetailer==='Sample reference price'?'The online figure is a sample for this demo, not a live retailer price.':'Online price was entered by the farmer. Delivery fees, offers and quality can change the final cost.')+'</p>'+
-     '<h4 style="margin:16px 0 4px">Price over 30 days</h4><div id="phist">'+(LIVE?'<p class="muted" style="font-size:13px">Loading price history</p>':histChart(histSeries(p),true))+'</div>'+(p.description?'<p style="margin-top:10px">'+esc(p.description)+'</p>':'')+reviewsHTML(p)+
+     ''+mandiBlock(p)+'<h4 style="margin:16px 0 4px">Price over 30 days</h4><div id="phist">'+(LIVE?'<p class="muted" style="font-size:13px">Loading price history</p>':histChart(histSeries(p),true))+'</div>'+(p.description?'<p style="margin-top:10px">'+esc(p.description)+'</p>':'')+reviewsHTML(p)+
      '<div class="mact"><button class="btn ghost" data-a="closeModal">Close</button><button class="btn" data-a="addClose" data-id="'+p.id+'" '+(p.qty<=0?'disabled':'')+'>Add to basket</button></div>');
     if(LIVE)apiCall('GET','/api/prices?name='+encodeURIComponent(p.name)+'&market='+encodeURIComponent(p.marketId)).then(function(j){var el=$('#phist');if(el)el.innerHTML=histChart(j.days,false)}).catch(function(){var el=$('#phist');if(el)el.innerHTML='<p class="muted" style="font-size:13px">Price history is not available right now.</p>'});
   },
@@ -2427,6 +2575,8 @@ document.addEventListener('change',function(e){
   if(k==='gsort'){S.ui.gsort=t.value;var sr2=$('#sres');if(sr2)sr2.innerHTML=offersHTML()}
   if(k==='gfrom'){S.ui.from=t.value;save();var sr3=$('#sres');if(sr3)sr3.innerHTML=offersHTML()}
   if(k==='pm'){S.ui.pm=t.value;$('#plist').innerHTML=plistHTML()}
+  if(k==='fc'){S.ui.fc=t.value;render(true)}
+  if(k==='bm'){S.ui.bm=t.value;var bb=$('#bres');if(bb)bb.innerHTML=boardRows()}
   if(k==='sort'){S.ui.sort=t.value;$('#grid').innerHTML=gridHTML(true)}
   if(k==='price'||k==='qty'){
     var p=prod(t.dataset.id),v=Number(t.value);
@@ -2512,7 +2662,7 @@ function titleFor(){
   var base='FarmConnect',u=S.ui;
   if(u.role==='farmer')return (isFarmer()?'Seller workspace':'Farmer portal')+' · '+base;
   if(u.view==='shop'){var m=mkt(u.marketId);return (m?m.name+' · ':'')+base}
-  var t={search:'Find produce',orders:'My orders',account:'Account',auth:'Sign in or register',checkout:'Checkout'}[u.view];
+  var t={board:'Mandi prices',search:'Find produce',orders:'My orders',account:'Account',auth:'Sign in or register',checkout:'Checkout'}[u.view];
   if(u.view==='page'){var pg=PAGES[u.page];t=pg?pg.t:null}
   return t?t+' · '+base:base+' · Fresh produce near you';
 }
@@ -3880,6 +4030,7 @@ if(window.addEventListener)window.addEventListener('popstate',function(e){
   lastSig=sigNow();closeAll();render();
 });
 setInterval(function(){try{if(expireHolds()){if(!$('#modal').classList.contains('on'))render(true);updateBadges()}}catch(e){}},30000);
+loadMandi();setInterval(function(){loadMandi();BD.done=false;if(S.ui.view==='board')loadBoard()},30*60*1000);document.addEventListener('visibilitychange',function(){if(!document.hidden)loadMandi()});
 try{if(LIVE)L.boot();else render();if(S.lang==='kn'){langPass();langWatch()}}catch(err){
   $('#app').innerHTML='<div class="wrap" style="padding-block:80px;max-width:560px"><h2 style="font-size:34px">Something went wrong</h2><p class="muted" style="margin:12px 0 20px">The saved data on this device could not be read. Resetting it takes you back to a clean start.</p><button class="btn" data-a="hardReset">Reset and reload</button></div>';
 }

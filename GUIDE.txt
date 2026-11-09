@@ -1,0 +1,41 @@
+FARMCONNECT: DAILY AUTOMATIC PRICES
+
+WHERE THE DATA COMES FROM
+Agmarknet (Ministry of Agriculture and Farmers Welfare, Govt of India) publishes daily mandi
+(wholesale market) prices and arrivals. The Open Government Data portal, data.gov.in, offers it as
+"Current Daily Price of Various Commodities from Various Markets (Mandi)".
+Fields: state, district, market, commodity, variety, grade, arrival_date, min/max/modal price (Rs per quintal).
+Prices are WHOLESALE; shop prices are usually higher. Some markets upload late or with mistakes.
+
+HOW FARMCONNECT USES IT (no server needed)
+1. A GitHub Action (.github/workflows/update-prices.yml) runs twice a day (11:10 and 19:10 IST).
+2. scripts/fetch_prices.py calls the data.gov.in API, converts Rs/quintal to Rs/kg, takes the
+   Bengaluru-area median (else Karnataka), and writes data/prices.json. It keeps 120 days of history.
+3. The website reads data/prices.json: product prices, "live" tags, weekly trend, 30-day chart and the
+   7-day forecast in the Farmer portal all update by themselves. The API key never reaches the browser.
+4. If the file is empty or missing, the site simply shows its normal catalogue prices.
+
+OPTION B: YOUR OWN SERVER (updates every 3 hours, no GitHub Action needed)
+  DATA_GOV_API_KEY=yourkey python3 server/price_server.py   (needs only Python 3, no installs)
+  It serves the site and data/prices.json, refreshes from data.gov.in by itself, and open pages
+  re-check every 30 minutes. Check http://yourserver:8000/status . To keep the site on GitHub Pages
+  and use the server only for prices, add before the closing body tag:
+  <script>window.FC_PRICE_URL="https://yourserver/data/prices.json"</script>
+
+ONE-TIME SETUP (OPTION A, GitHub Action) (about 5 minutes)
+1. Register free at https://data.gov.in, open My Account, copy your API key.
+2. In your GitHub repo: Settings > Secrets and variables > Actions > New repository secret
+   Name: DATA_GOV_API_KEY   Value: your key
+3. Upload everything in this folder to the repo (keep .github, scripts, data, produce, index.html).
+4. Repo > Actions > "Update daily mandi prices" > Run workflow. First run back-fills 14 days of history.
+5. Settings > Pages must serve the main branch. Done: it now updates itself every day.
+
+NOTES
+- I could not reach data.gov.in from my build sandbox, so the script was tested against a mock of the
+  feed, not the live one. If the first run reports "No rows", check the key and read the Action log.
+- To use another state: set env FC_STATE (for example "Tamil Nadu") in the workflow.
+
+ALL BENGALURU MARKETS AND ALL ITEMS
+Every update also writes data/board.json: every commodity sold in every Bengaluru-area mandi (districts
+Bangalore, Bengaluru, Bangalore Rural) with low, modal and high price per kg. In the website open
+"Mandi prices" in the top menu to search any item and filter by market. It is empty until the first update runs.
