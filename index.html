@@ -1076,6 +1076,24 @@ html.fc-scrolled .top .topin{height:54px;box-shadow:0 10px 30px rgba(19,40,28,.1
 .lg.fcl::before{background:#e0a21a}
 .tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;padding:4px 10px;background:var(--surface)}.tblwrap .fctab th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}.fctab{width:100%;border-collapse:collapse;font-size:14px}.fctab th,.fctab td{text-align:left;padding:6px 4px;border-bottom:1px solid rgba(128,128,128,.25)}
 #fcSel{width:100%}
+/* ---- farmer price outlook ---- */
+.osum{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 10px}
+.ochip{font:700 13px/1 var(--f-body);padding:8px 12px;border-radius:99px;background:var(--surface2);color:var(--muted)}
+.ochip.up{background:var(--leaf-soft);color:var(--good)}.ochip.dn{background:var(--warn-soft);color:var(--warn)}
+.obarall{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--surface2)}.obarall i{display:block;height:100%}
+.ogrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+@media(max-width:860px){.ogrid{grid-template-columns:1fr}}
+.olist{display:flex;flex-direction:column;gap:8px}
+.orow{display:grid;grid-template-columns:minmax(0,1.2fr) 96px minmax(40px,.6fr) auto;gap:12px;align-items:center;width:100%;text-align:left;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:inherit;font:inherit;cursor:pointer}
+.orow:hover{border-color:var(--brand)}.orow.sel{outline:2px solid var(--brand)}
+.onm{display:flex;flex-direction:column;gap:2px;min-width:0}.onm b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.onm small{color:var(--muted);font-size:12px}
+.obar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden}.obar i{display:block;height:100%;border-radius:99px;background:var(--muted)}
+.orow.up .obar i{background:var(--good)}.orow.dn .obar i{background:var(--warn)}
+.och{font-weight:700;font-size:14px;white-space:nowrap;color:var(--muted)}.orow.up .och{color:var(--good)}.orow.dn .och{color:var(--warn)}
+.spk{width:96px;height:30px}.sph{fill:none;stroke:var(--muted);stroke-width:1.6}.spf{fill:none;stroke:var(--muted);stroke-width:2;stroke-dasharray:3 3}
+.orow.up .spf{stroke:var(--good)}.orow.dn .spf{stroke:var(--warn)}
+.oadv{margin:-2px 0 6px 4px;font-size:13px;color:var(--muted)}
+@media(max-width:520px){.orow{grid-template-columns:minmax(0,1fr) 80px auto}.obar{display:none}}
 </style>
 
 <div id="app"></div>
@@ -1318,12 +1336,12 @@ function mandiHist(p){
   return out.length>=3?out:null;
 }
 function forecastOf(key){
-  var h=MP.history[key];if(!h||h.length<7)return null;
+  var h=MP.history[key];if(!h||h.length<3)return null;
   var pts=h.slice(-21),n=pts.length,t0=new Date(pts[0][0]+'T00:00:00Z').getTime();
   var xs=pts.map(function(r){return (new Date(r[0]+'T00:00:00Z').getTime()-t0)/864e5}),ys=pts.map(function(r){return r[1]});
   var mx=xs.reduce(function(a,b){return a+b},0)/n,my=ys.reduce(function(a,b){return a+b},0)/n,sxx=0,sxy=0;
   xs.forEach(function(x,i){sxx+=(x-mx)*(x-mx);sxy+=(x-mx)*(ys[i]-my)});
-  var b=sxx?sxy/sxx:0,a=my-b*mx,ss=0;
+  var b=sxx?sxy/sxx:0;if(n<7)b*=n/7;var a=my-b*mx,ss=0;
   ys.forEach(function(y,i){var e=y-(a+b*xs[i]);ss+=e*e});
   var sd=Math.sqrt(ss/Math.max(1,n-2)),last=ys[n-1],base=0.5*last+0.5*(a+b*xs[n-1]),fut=[],lo=[],hi=[];
   var band=Math.max(sd,last*0.03);
@@ -1355,36 +1373,67 @@ function fcChart(f){
 }
 function fcHTML(key){
   var f=forecastOf(key),days=(MP.history[key]||[]).length;
-  if(!f)return '<p class="muted" style="font-size:13px">A forecast needs at least 7 days of official prices. '+esc(key)+' has '+days+' so far, and one more day is added every morning.</p>';
+  if(!f)return '<p class="muted" style="font-size:13px">A forecast needs at least 3 days of price history. '+esc(key)+' has '+days+' so far, and one more day is added every day.</p>';
   var a=Math.round(f.lo[6]*2)/2,b=Math.round(f.hi[6]*2)/2,arrow=f.dir==='rising'?'▲':f.dir==='falling'?'▼':'●';
   return '<div class="fcard"><div class="fcbig"><span class="muted">Expected in 7 days</span><b class="mono">'+money(a)+' to '+money(b)+' <small>per kg</small></b></div>'+
    '<div class="fcrow"><span class="trend '+(f.dir==='rising'?'up':f.dir==='falling'?'dn':'')+'">'+arrow+' '+f.dir+'</span><span>'+esc(f.advice)+'</span></div></div>'+fcChart(f)+
-   '<p class="muted" style="font-size:12px">A simple trend estimate from the last '+Math.min(21,f.n)+' days of official mandi prices. It is a range, not a promise. Weather and festivals can move prices quickly.</p>';
+   '<p class="muted" style="font-size:12px">A simple trend estimate from the last '+Math.min(21,f.n)+' days of daily market prices'+(f.n<7?' (short history, so treat it as an early guide)':'')+'. It is a range, not a promise. Weather and festivals can move prices quickly.</p>';
 }
-function mandiBlock(p){
-  var o=mandiOf(p);if(!o)return '';
-  var f=forecastOf(o.key),line=f?'<br>Expected next week: <b>'+money(Math.round(f.lo[6]*2)/2)+' to '+money(Math.round(f.hi[6]*2)/2)+'</b> per kg, '+f.dir+'.':'';
-  return '<div class="mandi"><b>Official mandi price today: '+money(o.m)+' per kg</b> <span class="muted">('+money(o.lo)+' to '+money(o.hi)+')</span><br><span class="muted">'+esc(o.mk||o.s)+(o.n>1?' and '+(o.n-1)+' more':'')+' · '+esc(o.s)+' · '+mdate(o.d)+'. Wholesale rate, shop prices are usually higher.</span>'+line+'</div>';
-}
+function mandiBlock(p){return ''}
 function sourceLine(){
   if(!MP.ok||!MP.date)return '';
-  return 'Mandi prices: Agmarknet via data.gov.in, latest data '+mdate(MP.date)+'.';
+  return 'Data: Agmarknet (Government of India) via data.gov.in, latest '+mdate(MP.date)+'.';
+}
+function OL(){
+  var all=[],maxA=0.05;
+  Object.keys(MP.items).forEach(function(k){var f=forecastOf(k);if(f){all.push({k:k,f:f,it:MP.items[k]});maxA=Math.max(maxA,Math.abs(f.ch))}});
+  return {all:all,maxA:maxA};
+}
+function spark(f){
+  var W=96,H=30,k=Math.min(10,f.pts.length),vals=f.pts.slice(-k).map(function(r){return r[1]}).concat(f.fut);
+  var lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals);if(hi-lo<0.01){hi+=1;lo-=1}
+  var n=vals.length,h=[],g=[];
+  function X(i){return 2+(W-4)*i/(n-1)}function Y(v){return 3+(H-6)*(1-(v-lo)/(hi-lo))}
+  vals.forEach(function(v,i){var q=X(i).toFixed(1)+','+Y(v).toFixed(1);if(i<k)h.push(q);if(i>=k-1)g.push(q)});
+  return '<svg class="spk" viewBox="0 0 '+W+' '+H+'" aria-hidden="true"><polyline points="'+h.join(' ')+'" class="sph"/><polyline points="'+g.join(' ')+'" class="spf"/></svg>';
+}
+function ofRow(x,maxA){
+  var f=x.f,w=Math.max(6,Math.round(Math.abs(f.ch)/maxA*100)),cls=f.dir==='rising'?'up':f.dir==='falling'?'dn':'st';
+  var arrow=f.dir==='rising'?'▲':f.dir==='falling'?'▼':'●',txt=f.dir==='steady'?'steady':Math.round(Math.abs(f.ch)*100)+'%';
+  return '<button type="button" class="orow '+cls+(x.k===S.ui.fc?' sel':'')+'" data-a="fcpick" data-k="'+esc(x.k)+'"><span class="onm"><b>'+esc(x.k)+'</b><small class="mono">'+money(x.it.m)+' per kg</small></span>'+spark(f)+'<span class="obar"><i style="width:'+w+'%"></i></span><span class="och">'+arrow+' '+txt+'</span></button>';
+}
+function fqResults(){
+  var q=String(S.ui.fq||'').toLowerCase().trim();
+  if(!q)return '<p class="muted">Type a name, for example tomato, mango or onion.</p>';
+  var o=OL(),map={};o.all.forEach(function(x){map[x.k]=x});
+  var hits=Object.keys(MP.items).filter(function(k){return k.toLowerCase().indexOf(q)>-1}).sort();
+  if(!hits.length)return '<p class="muted">No match. Try another name.</p>';
+  return '<div class="olist">'+hits.slice(0,10).map(function(k){var x=map[k];return x?ofRow(x,o.maxA):'<div class="orow st"><span class="onm"><b>'+esc(k)+'</b><small class="mono">'+money(MP.items[k].m)+' per kg</small></span><span></span><span></span><span class="och">Needs more days</span></div>'}).join('')+'</div>';
 }
 function forecastTabHTML(){
-  var keys=Object.keys(MP.items).sort();
-  if(!MP.ok||!keys.length)return '<div class="panel"><h3>Price forecast</h3><p class="muted">Official daily prices have not loaded yet. They appear here once the daily update has run. Check the setup guide if this stays empty.</p></div>';
-  var mine=[];myProducts().forEach(function(p){var k=mandiName(p);if(k&&mine.indexOf(k)<0)mine.push(k)});
-  var cur=S.ui.fc&&MP.items[S.ui.fc]?S.ui.fc:(mine[0]||(MP.items.Tomato?'Tomato':keys[0]));S.ui.fc=cur;
-  var opt=function(k){return '<option '+(k===cur?'selected':'')+'>'+esc(k)+'</option>'};
-  var sel='<select id="fcSel" data-change="fc" aria-label="Crop">'+(mine.length?'<optgroup label="My crops">'+mine.map(opt).join('')+'</optgroup>':'')+'<optgroup label="All crops">'+keys.map(opt).join('')+'</optgroup></select>';
-  var it=MP.items[cur];
-  var rows=myProducts().map(function(p){var o=mandiOf(p);if(!o)return '';return '<tr><td>'+esc(p.name)+'</td><td class="mono">'+money(p.price)+'</td><td class="mono">'+money(o.m)+'</td></tr>'}).join('');
-  return '<div class="two"><div class="panel"><h3>Price forecast</h3><p class="muted" style="font-size:13px">Pick a crop to see where its price is heading.</p><div class="field" style="margin:12px 0">'+sel+'</div>'+
-   '<p style="margin:0 0 8px"><b>'+esc(cur)+'</b> today: <b class="mono">'+money(it.m)+'</b> per kg <span class="muted">('+money(it.lo)+' to '+money(it.hi)+', '+esc(it.mk||it.s)+', '+mdate(it.d)+')</span></p><div id="fcbody">'+fcHTML(cur)+'</div></div>'+
-   '<aside class="panel"><h3>Your prices vs the mandi</h3>'+(rows?'<table class="fctab"><thead><tr><th>Product</th><th>Yours</th><th>Mandi</th></tr></thead><tbody>'+rows+'</tbody></table>':'<p class="muted" style="font-size:13px">Add a product sold by the kg to compare it with today\'s mandi price.</p>')+
-   '<p class="muted" style="font-size:12px;margin-top:12px">'+esc(sourceLine())+' Mandi rates are wholesale, so retail prices are normally higher.</p></aside></div>';
+  var keys=Object.keys(MP.items);
+  if(!MP.ok||!keys.length)return '<div class="panel"><h3>Price forecast</h3><p class="muted">Price data has not loaded yet. It appears here after the daily update has run.</p></div>';
+  var o=OL(),all=o.all,days=0;
+  keys.forEach(function(k){days=Math.max(days,(MP.history[k]||[]).length)});
+  if(!all.length)return '<div class="panel"><h3>Price forecast</h3><p><b>'+days+' day'+(days===1?'':'s')+' of prices collected so far.</b></p><p class="muted">The forecast starts after 3 days of history and gets sharper every day. Come back soon.</p><p class="muted" style="font-size:12px;margin-top:12px">'+esc(sourceLine())+'</p></div>';
+  var up=all.filter(function(x){return x.f.dir==='rising'}).sort(function(a,b){return b.f.ch-a.f.ch}),
+      dn=all.filter(function(x){return x.f.dir==='falling'}).sort(function(a,b){return a.f.ch-b.f.ch}),
+      st=all.filter(function(x){return x.f.dir==='steady'}),tot=all.length;
+  var map={};all.forEach(function(x){map[x.k]=x});
+  var mine=[];myProducts().forEach(function(p){var k=mandiName(p);if(k&&map[k]&&mine.indexOf(k)<0)mine.push(k)});
+  var cur=S.ui.fc&&map[S.ui.fc]?S.ui.fc:(mine[0]||(up[0]&&up[0].k)||(dn[0]&&dn[0].k)||all[0].k);S.ui.fc=cur;
+  var seg=function(n,c){return n?'<i style="width:'+(n/tot*100).toFixed(1)+'%;background:'+c+'"></i>':''};
+  var col=function(cls,title,sub,list,empty){return '<section class="panel ocol '+cls+'"><h3>'+title+'</h3><p class="muted" style="font-size:13px;margin:2px 0 12px">'+sub+'</p>'+(list.length?'<div class="olist">'+list.slice(0,8).map(function(x){return ofRow(x,o.maxA)}).join('')+'</div>':'<p class="muted">'+empty+'</p>')+'</section>'};
+  var mineH=mine.length?'<section class="panel" style="margin-top:16px"><h3>Your crops</h3><p class="muted" style="font-size:13px;margin:2px 0 12px">What is expected for the things you sell.</p><div class="olist">'+mine.map(function(k){var x=map[k];return ofRow(x,o.maxA)+'<p class="oadv">'+esc(x.f.advice)+'</p>'}).join('')+'</div></section>':'';
+  return '<section class="panel"><h3>Price forecast: next 7 days</h3><p class="muted" style="font-size:13px;margin:2px 0 0">Across '+tot+' fruits, vegetables and groceries. Updated every day from the latest market prices.</p>'+
+    '<div class="osum"><span class="ochip up">▲ '+up.length+' going up</span><span class="ochip dn">▼ '+dn.length+' going down</span><span class="ochip st">● '+st.length+' steady</span></div>'+
+    '<div class="obarall" role="img" aria-label="'+up.length+' going up, '+dn.length+' going down, '+st.length+' steady">'+seg(up.length,'var(--good)')+seg(st.length,'var(--muted)')+seg(dn.length,'var(--warn)')+'</div></section>'+
+    mineH+
+    '<div class="ogrid">'+col('up','▲ Prices going UP','Good time to hold stock or plan to sell later.',up,'No big rises expected.')+col('dn','▼ Prices going DOWN','Consider selling sooner.',dn,'No big drops expected.')+'</div>'+
+    '<section class="panel"><h3>Search any fruit or vegetable</h3><div class="field" style="margin:12px 0"><label class="sr" for="fq">Search</label><input id="fq" type="search" placeholder="Tomato, onion, mango" value="'+esc(S.ui.fq||'')+'" autocomplete="off"></div><div id="fqres">'+fqResults()+'</div></section>'+
+    '<section class="panel" id="fcdetail" style="margin-top:16px"><h3>'+esc(cur)+'</h3><p style="margin:0 0 8px">Today: <b class="mono">'+money(MP.items[cur].m)+'</b> per kg</p><div id="fcbody">'+fcHTML(cur)+'</div></section>'+
+    '<p class="muted" style="font-size:12px;margin-top:12px">'+esc(sourceLine())+' Forecasts are estimates from recent price movement.</p>';
 }
-var BD={ok:false,rows:[],date:'',loading:false};
 function boardUrl(){return (window.FC_PRICE_URL||'data/prices.json').replace('prices.json','board.json')}
 function loadBoard(){
   if(BD.loading)return;BD.loading=true;
@@ -1409,7 +1458,7 @@ function boardView(){
    '<div class="fgrid" style="margin:14px 0"><div class="field"><label for="bq">Search item</label><input id="bq" type="search" placeholder="Tomato, onion, mango" value="'+esc(S.ui.bq||'')+'" autocomplete="off"></div><div class="field"><label for="bm">Market</label><select id="bm" data-change="bm"><option value="">All Bengaluru markets</option>'+mk.map(function(x){return '<option'+(x===S.ui.bm?' selected':'')+'>'+esc(x)+'</option>'}).join('')+'</select></div></div>'+
    '<div id="bres">'+boardRows()+'</div><p class="muted" style="font-size:12px;margin-top:12px">Source: Agmarknet, Ministry of Agriculture and Farmers Welfare, via data.gov.in.</p></div>';
 }
-document.addEventListener('input',function(e){var t=e.target;if(t&&t.id==='bq'){S.ui.bq=t.value;var b=$('#bres');if(b)b.innerHTML=boardRows()}});
+document.addEventListener('input',function(e){var t=e.target;if(t&&t.id==='fq'){S.ui.fq=t.value;var r=$('#fqres');if(r)r.innerHTML=fqResults();return}if(t&&t.id==='bq'){S.ui.bq=t.value;var b=$('#bres');if(b)b.innerHTML=boardRows()}});
 function loadMandi(){
   try{
     fetch((window.FC_PRICE_URL||'data/prices.json')+'?t='+Math.floor(Date.now()/60000),{cache:'no-cache'}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
@@ -1430,7 +1479,7 @@ function histSeries(p){
 }
 function was7(p){if(LIVE)return p.was7==null?null:Number(p.was7);var lv=mandiHist(p);if(lv){var tg=ymd(-7),w=null;lv.forEach(function(r){if(r.day<=tg)w=r.market});if(w==null&&lv.length>=5)w=lv[0].market;var cu=lv[lv.length-1].market;return(w==null||!(cu>0))?null:Math.round(p.price*w/cu*2)/2}return histSeries(p)[22].market}
 function trendOf(p){var w=was7(p);if(!w||!(p.price>0))return null;var pc=(p.price-w)/w;return Math.abs(pc)<0.03?null:pc}
-function trendHTML(p){var lv=(!p.ownerId&&mandiOf(p))?'<span class="livetag" title="Official mandi price, '+mdate(mandiOf(p).d)+'">● live</span> ':'';var t=trendOf(p);if(t==null)return lv;var up=t>0;return lv+'<span class="trend '+(up?'up':'dn')+'" title="Compared with about a week ago">'+(up?'▲ ':'▼ ')+Math.round(Math.abs(t)*100)+'% this week</span>'}
+function trendHTML(p){var lv='';var t=trendOf(p);if(t==null)return lv;var up=t>0;return lv+'<span class="trend '+(up?'up':'dn')+'" title="Compared with about a week ago">'+(up?'▲ ':'▼ ')+Math.round(Math.abs(t)*100)+'% this week</span>'}
 function histChart(days,sample){
   var pts=(days||[]).filter(function(d){return d.market!=null||d.city!=null});
   if(pts.length<3)return '<p class="muted" style="font-size:13px">Price history builds up as sellers update their prices. Check back in a few days.</p>';
@@ -1449,7 +1498,7 @@ function histChart(days,sample){
    '<text x="'+(pl-6)+'" y="'+(Y(hi)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(hi)+'</text><text x="'+(pl-6)+'" y="'+(Y(lo)+4).toFixed(1)+'" class="ht" text-anchor="end">'+money(lo)+'</text>'+
    '<text x="'+pl+'" y="'+(H-6)+'" class="ht">'+dl(first.day)+'</text><text x="'+(W-pr)+'" y="'+(H-6)+'" class="ht" text-anchor="end">'+dl(last.day)+'</text>'+
    (pts[0].live?'':'<polyline points="'+line('city')+'" class="hcity"/>')+'<polyline points="'+line('market')+'" class="hmk"/></svg>'+
-   (pts[0].live?'<figcaption><span class="lg mk">Official mandi price, rupees per kg</span></figcaption>':'<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>')+'</figure>';
+   (pts[0].live?'<figcaption><span class="lg mk">Price, rupees per kg</span></figcaption>':'<figcaption><span class="lg mk">This market</span><span class="lg ct">All Bengaluru markets</span></figcaption>')+'</figure>';
 }
 function farmKey(p){return p.ownerId?String(p.ownerId):'s:'+p.farmer}
 var SEEDFARM={'Ramesh Farm':{owner:'Ramesh',area:'Anekal',grow:'Tomato, beans, brinjal',since:'2004',story:'A family plot near Anekal. Vegetables are picked in the morning and brought to the market the same day.'},'Lakshmi Farms':{owner:'Lakshmi',area:'Kanakapura Road',grow:'Greens, drumstick, gourds',since:'2011',story:'Lakshmi grows leafy greens and gourds with farmyard manure, and sells directly to the same regular shoppers each week.'},'Green Valley Farm':{owner:'Suresh',area:'Doddaballapur',grow:'Carrot, beetroot, cabbage',since:'1998',story:'Three generations of growers. Root vegetables are washed and sorted by hand.'},'Basava Organics':{owner:'Basavaraj',area:'Kolar',grow:'Millets, ragi, pulses',since:'2016',story:'Small-batch millets and pulses grown without chemical sprays.'},'Gowda Agro':{owner:'Gowda',area:'Mandya',grow:'Banana, sugarcane, coconut',since:'1992',story:'Bananas and coconuts from the Mandya belt, cut when ordered.'},'Kaveri Growers':{owner:'Meena',area:'Kaveri belt',grow:'Chilli, onion, garlic',since:'2009',story:'A group of five neighbouring farms selling together.'},'Nandi Hills Orchards':{owner:'Prakash',area:'Nandi Hills',grow:'Grapes, strawberry, guava',since:'2001',story:'Hill orchards. Fruit is picked ripe and packed in small trays.'},'Mandya Fresh':{owner:'Kumar',area:'Mandya',grow:'Maize, sweet corn, gourds',since:'2013',story:'Fresh corn and gourds, harvested at dawn.'},'Anekal Organics':{owner:'Divya',area:'Anekal',grow:'Herbs, spinach, coriander',since:'2018',story:'A small organic plot supplying herbs and greens.'},'Hosur Road Farms':{owner:'Vijay',area:'Hosur Road',grow:'Papaya, pomegranate, lime',since:'2007',story:'Fruit farm on the Hosur belt.'},'Devanahalli Growers':{owner:'Narayan',area:'Devanahalli',grow:'Amaranth, dill, fenugreek',since:'2010',story:'Leafy greens grown close to the city, so they reach you quickly.'},'Kolar Harvest':{owner:'Anitha',area:'Kolar',grow:'Tomato, mango, potato',since:'2000',story:'Kolar is known for tomatoes and mangoes. This farm sells both.'},'Doddaballapur Greens':{owner:'Shivu',area:'Doddaballapur',grow:'Cabbage, cauliflower, peas',since:'2012',story:'Cool-season vegetables from the north of the city.'},'Magadi Naturals':{owner:'Roopa',area:'Magadi',grow:'Curry leaves, moringa, beans',since:'2015',story:'Curry leaves and moringa from a small natural farm.'}};
@@ -1786,7 +1835,7 @@ function header(){
   if(area){
     nav='<nav class="nav" aria-label="Main"><button data-a="home">'+ic('store')+' Storefront</button><button class="on" aria-current="page">'+ic('leaf')+' '+(inWs?'Seller workspace':'Farmer portal')+'</button></nav>';
   }else{
-    nav='<nav class="nav" aria-label="Main"><button class="'+(home?'on':'')+'" data-a="home"'+(home?' aria-current="page"':'')+'>'+ic('store')+' Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search"'+(v==='search'?' aria-current="page"':'')+'>'+ic('search')+' Find produce</button><button class="'+(v==='board'?'on':'')+'" data-a="nav" data-v="board"'+(v==='board'?' aria-current="page"':'')+'>'+ic('chart')+' Mandi prices</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders"'+(v==='orders'?' aria-current="page"':'')+'>'+ic('box')+' My orders <span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button>'+
+    nav='<nav class="nav" aria-label="Main"><button class="'+(home?'on':'')+'" data-a="home"'+(home?' aria-current="page"':'')+'>'+ic('store')+' Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search"'+(v==='search'?' aria-current="page"':'')+'>'+ic('search')+' Find produce</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders"'+(v==='orders'?' aria-current="page"':'')+'>'+ic('box')+' My orders <span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button>'+
       (isFarmer()?'<button data-a="workspace">'+ic('leaf')+' Seller workspace <span class="pill-n" data-count="farmer" '+(nf?'':'hidden')+'>'+nf+'</span></button>':'<button data-a="fportal" data-t="login">'+ic('leaf')+' For farmers</button>')+'</nav>';
   }
   var right='';
@@ -1801,7 +1850,7 @@ function header(){
   right+='<button class="icon hide-m" data-a="theme" aria-label="Toggle dark mode">'+ic('moon')+'</button>';
   return '<a class="skip" href="#main-content" data-a="skip">Skip to content</a>'+''+
    '<header class="top"><div class="wrap topin"><button class="brand" data-a="home" aria-label="FarmConnect home">'+ic('leaf')+'<span>FarmConnect</span></button>'+nav+'<div class="topr">'+right+'</div></div></header>'+
-   (!area?'<div class="tabbar"><div class="wrap"><button class="'+(home?'on':'')+'" data-a="home">'+ic('store')+'Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search">'+ic('search')+'Find</button><button class="'+(v==='board'?'on':'')+'" data-a="nav" data-v="board">'+ic('chart')+'Prices</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders">'+ic('box')+'Orders<span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button><button data-a="openCart">'+ic('bag')+'Basket<span class="pill-n" data-count="cart2" '+(n?'':'hidden')+'>'+n+'</span></button><button class="'+((v==='account'||v==='auth')?'on':'')+'" data-a="'+(a&&a.role==='farmer'?'myprofile':'nav')+'" data-v="'+(a&&a.role==='customer'?'account':'auth')+'" data-t="login">'+ic('user')+(a?'Account':'Sign in')+'</button></div></div>':'');
+   (!area?'<div class="tabbar"><div class="wrap"><button class="'+(home?'on':'')+'" data-a="home">'+ic('store')+'Markets</button><button class="'+(v==='search'?'on':'')+'" data-a="nav" data-v="search">'+ic('search')+'Find</button><button class="'+(v==='orders'?'on':'')+'" data-a="nav" data-v="orders">'+ic('box')+'Orders<span class="pill-n" data-count="orders" '+(active?'':'hidden')+'>'+active+'</span></button><button data-a="openCart">'+ic('bag')+'Basket<span class="pill-n" data-count="cart2" '+(n?'':'hidden')+'>'+n+'</span></button><button class="'+((v==='account'||v==='auth')?'on':'')+'" data-a="'+(a&&a.role==='farmer'?'myprofile':'nav')+'" data-v="'+(a&&a.role==='customer'?'account':'auth')+'" data-t="login">'+ic('user')+(a?'Account':'Sign in')+'</button></div></div>':'');
 }
 function updateBadges(){
   var n=cartCount(),a=myOrders().filter(function(o){return ['awaiting','new','accepted','ready'].indexOf(o.status)>-1}).length,f=newRequests();
@@ -1872,7 +1921,7 @@ function farmerView(){
   var nNew=os.filter(function(x){return x.status==='new'}).length,nProg=os.filter(function(x){return x.status==='accepted'||x.status==='ready'}).length;
   var sales=os.filter(function(x){return x.status==='done'}).reduce(function(s,x){return s+x.total},0);
   var low=mine.filter(function(p){return p.qty<=5}).length;
-  var tabs=[['requests','Requests',nNew],['bring','Bring list',0],['products','Products',0],['forecast','Forecast',0],['add',S.ui.editId?'Edit product':'Add product',0],['markets','Markets',0],['profile','Profile',0]];
+  var tabs=[['requests','Requests',nNew],['bring','Bring list',0],['products','Products',0],['forecast','Price forecast',0],['add',S.ui.editId?'Edit product':'Add product',0],['markets','Markets',0],['profile','Profile',0]];
   var body=S.ui.ftab==='requests'?requestsHTML():S.ui.ftab==='bring'?bringHTML():S.ui.ftab==='products'?productsHTML():S.ui.ftab==='forecast'?forecastTabHTML():S.ui.ftab==='add'?productFormHTML():S.ui.ftab==='profile'?profileHTML():marketsAdminHTML();
   var pend=LIVE&&a.status==='pending'?'<div class="note" style="background:var(--warn-soft);color:var(--warn);margin-bottom:16px">Your seller account is waiting for approval. You can add products now. Customers see them once we approve your account, usually within a day.</div>':'';
   return '<div class="wrap view">'+pend+confirmBanner()+'<div class="fhero"><div><div class="eyebrow">Seller workspace</div><h2 style="margin-top:8px">'+esc(fm.farm||'Your farm')+'</h2><div class="fid"><span class="muted">Farmer ID</span> <b class="mono">'+esc(a.loginId)+'</b> <button class="link" data-a="copyText" data-t="'+esc(a.loginId)+'">Copy</button></div></div><button class="btn accent" data-a="addNew">'+ic('plus')+' Add a product</button></div>'+
@@ -2495,6 +2544,7 @@ var A={
     S.cart={marketId:o.marketId,items:items};S.ui.marketId=o.marketId;save();updateBadges();openDrawer();toast('Items added to your basket.')
   },
   /* farmer */
+  fcpick:function(d){S.ui.fc=d.k;render(true);var el=$('#fcdetail');if(el&&el.scrollIntoView)el.scrollIntoView({behavior:'smooth',block:'start'})},
   ftab:function(d){S.ui.ftab=d.t;if(d.t!=='add')S.ui.editId=null;if(d.t!=='markets')S.ui.pin=null;render(true)},
   rf:function(d){S.ui.rf=d.f;$('#fbody').innerHTML=requestsHTML()},
   addNew:function(){PH.product=undefined;S.ui.editId=null;S.ui.ftab='add';render(true)},
