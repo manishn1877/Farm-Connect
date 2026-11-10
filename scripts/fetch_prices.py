@@ -19,7 +19,8 @@ LOCAL = [x.strip().lower() for x in os.environ.get("FC_LOCAL_DISTRICTS", "bangal
 OUT = os.environ.get("FC_OUT", os.path.join(os.path.dirname(__file__), "..", "data", "prices.json"))
 BASE = os.environ.get("FC_API_BASE", ENDPOINT)          # overridable for tests
 KEEP_DAYS = 120
-AUTO_BACKFILL = int(os.environ.get("FC_BACKFILL_DAYS", "14"))   # used only when there is no history yet
+AUTO_BACKFILL = int(os.environ.get("FC_BACKFILL_DAYS", "0"))   # used only when there is no history yet
+FAILED = []
 IST = timezone(timedelta(hours=5, minutes=30))
 
 # Agmarknet commodity name (lower-case, letters and digits only)  ->  FarmConnect catalogue name (kg items only)
@@ -52,7 +53,7 @@ ALIAS = {
 def key(s):
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
-def http_json(params, tries=3):
+def http_json(params, tries=5):
     url = BASE + "?" + urllib.parse.urlencode(params)
     ctx = ssl.create_default_context()
     last = None
@@ -61,9 +62,21 @@ def http_json(params, tries=3):
             req = urllib.request.Request(url, headers={"User-Agent": "FarmConnect-price-updater/1.0", "Accept": "application/json"})
             with urllib.request.urlopen(req, timeout=90, context=ctx) as r:
                 return json.load(r)
-        except Exception as e:                      # network hiccup, 5xx, bad JSON
+        except urllib.error.HTTPError as e:
+            body = ""
+            try:
+                body = e.read().decode("utf-8", "replace")[:200]
+            except Exception:
+                pass
+            last = "HTTP %s %s" % (e.code, body)
+            print("  attempt %d: %s" % (i + 1, last), file=sys.stderr)
+            if e.code in (401, 403):            # bad key: retrying will not help
+                break
+            time.sleep(30 * (i + 1) if e.code == 429 else 5 * (i + 1))
+        except Exception as e:                  # network hiccup, bad JSON
             last = e
-            time.sleep(3 * (i + 1))
+            print("  attempt %d: %s" % (i + 1, last), file=sys.stderr)
+            time.sleep(5 * (i + 1))
     raise RuntimeError("API request failed: %s" % last)
 
 def pick(row, *names):
@@ -106,6 +119,7 @@ def fetch_rows(api_key, date_dmy=None):
                 offset += 1000
         except RuntimeError as e:
             print("  warning:", e, file=sys.stderr)
+            FAILED.append(str(e))
             rows = []
         if rows:
             return rows
@@ -179,10 +193,19 @@ def main():
     print("Fetching latest rows for", STATE)
     rows = fetch_rows(api_key)
     if not rows:
+        if FAILED:
+            sys.exit("The API call FAILED, so nothing was updated: " + FAILED[-1])
         print("No rows returned (data may not be published yet). Leaving files unchanged.")
         return
+    print("Got %d rows from %d districts" % (len(rows), len(set((pick(r, "district") or "") for r in rows))))
     agg, unmatched = aggregate(rows)
     board = build_board(rows)
+    if not board:
+        print("No Bengaluru-area rows today: showing all %s markets on the board instead" % STATE)
+        saved = LOCAL[:]
+        LOCAL[:] = [""]                      # "" matches every district
+        board = build_board(rows)
+        LOCAL[:] = saved
     if board:
         bp = os.path.join(os.path.dirname(os.path.abspath(OUT)), "board.json")
         os.makedirs(os.path.dirname(bp), exist_ok=True)
