@@ -12,7 +12,8 @@ permissions:
 
 jobs:
   update:
-    runs-on: [self-hosted, Windows, X64]
+    runs-on: windows-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -29,6 +30,7 @@ jobs:
         run: python scripts/fetch_prices.py
 
       - name: Commit updated prices
+        shell: pwsh
         run: |
           git config user.name "farmconnect-bot"
           git config user.email "actions@users.noreply.github.com"
