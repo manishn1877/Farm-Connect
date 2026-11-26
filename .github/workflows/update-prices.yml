@@ -17,6 +17,48 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Diagnose data.gov.in connectivity
+        continue-on-error: true
+        env:
+          DATA_GOV_API_KEY: ${{ secrets.DATA_GOV_API_KEY }}
+        run: |
+          echo "Testing data.gov.in with curl..."
+          if curl --silent --show-error --connect-timeout 15 --max-time 30 --output /dev/null --write-out "curl HTTP status: %{http_code}\n" --get "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070" --data-urlencode "api-key=$DATA_GOV_API_KEY" --data-urlencode "format=json" --data-urlencode "limit=1" --data-urlencode "filters[state]=Karnataka"; then
+            echo "curl transport: reachable"
+          else
+            echo "curl transport: failed"
+          fi
+
+          echo "Testing data.gov.in with Python urllib..."
+          python - <<'PY'
+          import os
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          base = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+          params = urllib.parse.urlencode({
+              "api-key": os.environ["DATA_GOV_API_KEY"],
+              "format": "json",
+              "limit": "1",
+              "filters[state]": "Karnataka",
+          })
+          request = urllib.request.Request(
+              f"{base}?{params}",
+              headers={"User-Agent": "curl/8.1.2", "Accept": "application/json"},
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  print(f"Python urllib HTTP status: {response.status}")
+          except urllib.error.HTTPError as exc:
+              print(f"Python urllib HTTP status: {exc.code}")
+          except urllib.error.URLError as exc:
+              print(f"Python urllib transport error: {type(exc.reason).__name__}")
+          except Exception as exc:
+              print(f"Python urllib error: {type(exc).__name__}")
+          PY
+
       - name: Fetch official prices
         env:
           DATA_GOV_API_KEY: ${{ secrets.DATA_GOV_API_KEY }}
