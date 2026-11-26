@@ -60,8 +60,14 @@ def http_json(params, tries=8):
     last = None
     for i in range(tries):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "FarmConnect-price-updater/1.0", "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
+            req = urllib.request.Request(
+   		url,
+    		headers={
+        	   "User-Agent": "curl/8.1.2",
+                   "Accept": "application/json"
+                }
+             )
+            with urllib.request.urlopen(req, timeout=60, context=ctx) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
             body = ""
@@ -113,7 +119,7 @@ def fetch_rows(api_key, date_dmy=None):
     """Fetch rows; try the alternate filter only for a rejected filter syntax."""
     errors = []
     had_successful_response = False
-    for state_filter in ("filters[state.keyword]", "filters[state]"):
+    for state_filter in ("filters[state]",):
         rows, offset = [], 0
         try:
             while True:
