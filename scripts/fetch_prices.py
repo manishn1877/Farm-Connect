@@ -53,14 +53,15 @@ ALIAS = {
 def key(s):
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
-def http_json(params, tries=5):
+def http_json(params, tries=8):
+    """Request JSON with up to eight attempts for temporary errors."""
     url = BASE + "?" + urllib.parse.urlencode(params)
     ctx = ssl.create_default_context()
     last = None
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "FarmConnect-price-updater/1.0", "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=90, context=ctx) as r:
+            with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
             body = ""
@@ -69,15 +70,21 @@ def http_json(params, tries=5):
             except Exception:
                 pass
             last = "HTTP %s %s" % (e.code, body)
-            print("  attempt %d: %s" % (i + 1, last), file=sys.stderr)
-            if e.code in (401, 403):            # bad key: retrying will not help
+            print("  attempt %d/%d: %s" % (i + 1, tries, last), file=sys.stderr)
+            if e.code in (400, 401, 403, 404):
                 break
-            time.sleep(30 * (i + 1) if e.code == 429 else 5 * (i + 1))
-        except Exception as e:                  # network hiccup, bad JSON
+            if i + 1 < tries:
+                delay = 60 if e.code == 429 else min(10 * (i + 1), 60)
+                print("  retrying in %d seconds..." % delay, file=sys.stderr)
+                time.sleep(delay)
+        except Exception as e:
             last = e
-            print("  attempt %d: %s" % (i + 1, last), file=sys.stderr)
-            time.sleep(5 * (i + 1))
-    raise RuntimeError("API request failed: %s" % last)
+            print("  attempt %d/%d: %s" % (i + 1, tries, last), file=sys.stderr)
+            if i + 1 < tries:
+                delay = min(10 * (i + 1), 60)
+                print("  retrying in %d seconds..." % delay, file=sys.stderr)
+                time.sleep(delay)
+    raise RuntimeError("API request failed after %d attempts: %s" % (tries, last))
 
 def pick(row, *names):
     low = {k.lower(): v for k, v in row.items()}
@@ -103,7 +110,9 @@ def to_iso(d):
     return None
 
 def fetch_rows(api_key, date_dmy=None):
-    """All rows for the state (optionally one arrival date). Tries filter spellings the portal has used."""
+    """Fetch rows; try the alternate filter only for a rejected filter syntax."""
+    errors = []
+    had_successful_response = False
     for state_filter in ("filters[state.keyword]", "filters[state]"):
         rows, offset = [], 0
         try:
@@ -112,17 +121,25 @@ def fetch_rows(api_key, date_dmy=None):
                 if date_dmy:
                     p["filters[arrival_date]"] = date_dmy
                 data = http_json(p)
+                had_successful_response = True
                 recs = data.get("records") or []
                 rows += recs
                 if len(recs) < 1000 or offset > 20000:
                     break
                 offset += 1000
         except RuntimeError as e:
-            print("  warning:", e, file=sys.stderr)
-            FAILED.append(str(e))
-            rows = []
+            message = str(e)
+            print("  warning:", message, file=sys.stderr)
+            errors.append(message)
+            if "HTTP 400" not in message:
+                FAILED.append(message)
+                return []
+            continue
         if rows:
             return rows
+
+    if not had_successful_response and errors:
+        FAILED.extend(errors)
     return []
 
 def aggregate(rows):
@@ -194,8 +211,9 @@ def main():
     rows = fetch_rows(api_key)
     if not rows:
         if FAILED:
-            sys.exit("The API call FAILED, so nothing was updated: " + FAILED[-1])
-        print("No rows returned (data may not be published yet). Leaving files unchanged.")
+            sys.exit("The API could not be reached after retries; no files were changed. Last error: " + FAILED[-1])
+        print("NO DATA AVAILABLE: data.gov.in responded successfully but returned no mandi rows yet.")
+        print("This is a normal no-data result. Keeping the last successful prices unchanged.")
         return
     print("Got %d rows from %d districts" % (len(rows), len(set((pick(r, "district") or "") for r in rows))))
     agg, unmatched = aggregate(rows)
