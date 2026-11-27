@@ -1,0 +1,60 @@
+name: Diagnose data.gov.in connectivity (temporary)
+
+on:
+  push:
+    branches: [diag/connectivity]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Runner egress identity
+        continue-on-error: true
+        run: |
+          echo "OS=${{ matrix.os }}"
+          curl -sS --max-time 15 https://ipinfo.io/json | tr -d '\n' | sed 's/"readme".*//' || echo "ipinfo failed"
+          echo
+
+      - name: DNS for api.data.gov.in
+        continue-on-error: true
+        run: |
+          (getent ahosts api.data.gov.in || nslookup api.data.gov.in || dscacheutil -q host -a name api.data.gov.in) 2>&1 | head -12
+
+      - name: Reachability probes (no API key used)
+        continue-on-error: true
+        run: |
+          probe() {
+            label="$1"; shift
+            out=$(curl -sS -o /dev/null --connect-timeout 10 --max-time 20 \
+              -w "http=%{http_code} ip=%{remote_ip} connect=%{time_connect}s tls=%{time_appconnect}s total=%{time_total}s" "$@" 2>&1)
+            rc=$?
+            echo "[$label] rc=$rc $out"
+          }
+          R=https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070
+          probe "api.data.gov.in v4 https" -4 "$R?format=json&limit=1"
+          probe "api.data.gov.in v6 https" -6 "$R?format=json&limit=1"
+          probe "api.data.gov.in http:80 " -4 "http://api.data.gov.in/"
+          probe "data.gov.in https        " -4 https://data.gov.in/
+          probe "www.data.gov.in https    " -4 https://www.data.gov.in/
+          probe "agmarknet.gov.in https   " -4 https://agmarknet.gov.in/
+          probe "www.india.gov.in https   " -4 https://www.india.gov.in/
+          probe "karnataka.gov.in https   " -4 https://www.karnataka.gov.in/
+          probe "script.google.com https  " -4 https://script.google.com/
+          probe "workers.dev https        " -4 https://workers.dev/
+          probe "example.com https (ctrl) " -4 https://example.com/
+
+      - name: TCP and TLS detail for api.data.gov.in
+        continue-on-error: true
+        run: |
+          curl -v -4 --connect-timeout 10 --max-time 20 -o /dev/null "https://api.data.gov.in/" 2>&1 | grep -vi "api-key" | head -25
