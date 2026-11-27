@@ -4,11 +4,17 @@ name: Update daily mandi prices
 on:
   schedule:
     - cron: "40 5 * * *"
+    - cron: "40 9 * * *"
     - cron: "40 13 * * *"
+    - cron: "40 17 * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: update-prices
+  cancel-in-progress: false
 
 jobs:
   update:

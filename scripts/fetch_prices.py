@@ -19,6 +19,7 @@ LOCAL = [x.strip().lower() for x in os.environ.get("FC_LOCAL_DISTRICTS", "bangal
 OUT = os.environ.get("FC_OUT", os.path.join(os.path.dirname(__file__), "..", "data", "prices.json"))
 BASE = os.environ.get("FC_API_BASE", ENDPOINT)          # overridable for tests
 KEEP_DAYS = 120
+STALE_DAYS = float(os.environ.get("FC_STALE_DAYS", "3"))   # fail the run only if stored prices are older than this
 AUTO_BACKFILL = int(os.environ.get("FC_BACKFILL_DAYS", "0"))   # used only when there is no history yet
 FAILED = []
 IST = timezone(timedelta(hours=5, minutes=30))
@@ -53,20 +54,20 @@ ALIAS = {
 def key(s):
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
-def http_json(params, tries=8):
-    """Request JSON with up to eight attempts for temporary errors."""
+def http_json(params, tries=4):
+    """Request JSON with a few attempts for temporary errors.
+
+    Kept short on purpose: the workflow runs several times a day, so a run that
+    cannot get through just stops and the next scheduled run tries again."""
     url = BASE + "?" + urllib.parse.urlencode(params)
     ctx = ssl.create_default_context()
     last = None
     for i in range(tries):
         try:
             req = urllib.request.Request(
-   		url,
-    		headers={
-        	   "User-Agent": "curl/8.1.2",
-                   "Accept": "application/json"
-                }
-             )
+                url,
+                headers={"User-Agent": "curl/8.1.2", "Accept": "application/json"},
+            )
             with urllib.request.urlopen(req, timeout=60, context=ctx) as r:
                 return json.load(r)
         except urllib.error.HTTPError as e:
@@ -80,14 +81,14 @@ def http_json(params, tries=8):
             if e.code in (400, 401, 403, 404):
                 break
             if i + 1 < tries:
-                delay = 60 if e.code == 429 else min(10 * (i + 1), 60)
+                delay = 30 * (i + 1) if e.code == 429 else min(10 * (i + 1), 30)
                 print("  retrying in %d seconds..." % delay, file=sys.stderr)
                 time.sleep(delay)
         except Exception as e:
             last = e
             print("  attempt %d/%d: %s" % (i + 1, tries, last), file=sys.stderr)
             if i + 1 < tries:
-                delay = min(10 * (i + 1), 60)
+                delay = min(10 * (i + 1), 30)
                 print("  retrying in %d seconds..." % delay, file=sys.stderr)
                 time.sleep(delay)
     raise RuntimeError("API request failed after %d attempts: %s" % (tries, last))
@@ -200,6 +201,14 @@ def build_board(rows):
     out = sorted((v[1] for v in best.values()), key=lambda x: (x[0].lower(), x[2].lower()))
     return out
 
+def age_days(updated):
+    """Days since the 'updated' timestamp in prices.json, or None if unknown."""
+    try:
+        t = datetime.strptime(updated, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - t).total_seconds() / 86400
+    except Exception:
+        return None
+
 def main():
     api_key = os.environ.get("DATA_GOV_API_KEY", "").strip()
     if not api_key:
@@ -217,7 +226,14 @@ def main():
     rows = fetch_rows(api_key)
     if not rows:
         if FAILED:
-            sys.exit("The API could not be reached after retries; no files were changed. Last error: " + FAILED[-1])
+            msg = "The API could not be reached after retries; no files were changed. Last error: " + FAILED[-1]
+            age = age_days(old.get("updated"))
+            if age is None or age > STALE_DAYS:
+                # Nothing usable on disk, or it has been stale too long: fail so the owner is alerted.
+                sys.exit(msg + " (stored prices are %s)" % ("missing" if age is None else "%.1f days old" % age))
+            print("::warning::" + msg)
+            print("Keeping the last prices (%.1f days old). The next scheduled run will try again." % age)
+            return
         print("NO DATA AVAILABLE: data.gov.in responded successfully but returned no mandi rows yet.")
         print("This is a normal no-data result. Keeping the last successful prices unchanged.")
         return
