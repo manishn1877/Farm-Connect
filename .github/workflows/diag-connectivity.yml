@@ -34,6 +34,7 @@ jobs:
       - name: Reachability probes (no API key used)
         continue-on-error: true
         run: |
+          set +e
           probe() {
             label="$1"; shift
             out=$(curl -sS -o /dev/null --connect-timeout 10 --max-time 20 \
