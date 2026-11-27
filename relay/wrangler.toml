@@ -1,0 +1,12 @@
+name = "farmconnect-mandi-relay"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Run the Worker (and therefore its outbound request to data.gov.in) close to the AWS
+# Mumbai region instead of wherever the caller is. GitHub runners are in the US, and
+# api.data.gov.in refuses connections from there.
+[placement]
+region = "aws:ap-south-1"
+
+# Secrets (never put these in this file):
+#   wrangler secret put RELAY_TOKEN
