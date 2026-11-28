@@ -1,12 +1,9 @@
-
 name: Update daily mandi prices
 
 on:
   schedule:
-    - cron: "40 5 * * *"
-    - cron: "40 9 * * *"
-    - cron: "40 13 * * *"
-    - cron: "40 17 * * *"
+    - cron: "40 5 * * *"    # 11:10 IST
+    - cron: "40 13 * * *"   # 19:10 IST
   workflow_dispatch:
 
 permissions:
@@ -18,8 +15,8 @@ concurrency:
 
 jobs:
   update:
-    runs-on: windows-latest
-    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -30,27 +27,45 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Keyless connectivity check. Tells you in one line WHY a run cannot fetch prices.
+      - name: Preflight - can this runner reach the price source?
+        continue-on-error: true
+        env:
+          FC_RELAY_URL: ${{ secrets.FC_RELAY_URL }}
+          FC_RELAY_TOKEN: ${{ secrets.FC_RELAY_TOKEN }}
+        run: |
+          set +e
+          if [ -n "$FC_RELAY_URL" ]; then
+            echo "Route: relay"
+            out=$(curl -sS --connect-timeout 10 --max-time 40 -H "X-Relay-Token: $FC_RELAY_TOKEN" "${FC_RELAY_URL%/}/probe" 2>&1)
+            rc=$?
+            if [ $rc -ne 0 ]; then echo "::warning::Relay unreachable (curl exit $rc). Check FC_RELAY_URL and that the Worker is deployed."
+            else echo "Relay answer: $out"
+              echo "$out" | grep -q '"upstream_reachable":true' || echo "::warning::Relay is up but data.gov.in is not reachable from the Worker's network. See relay/README.md (placement / fallback)."
+            fi
+          else
+            echo "Route: DIRECT (no relay configured)"
+            curl -sS -o /dev/null --connect-timeout 10 --max-time 20 -w "direct api.data.gov.in: http=%{http_code}\n" "https://api.data.gov.in/" 2>&1 \
+              || echo "::warning::Direct access to api.data.gov.in is blocked from GitHub-hosted runners (verified: connection refused/timeout on ubuntu, windows, macos). Configure the relay."
+          fi
+          exit 0
+
       - name: Fetch official mandi prices
         env:
           DATA_GOV_API_KEY: ${{ secrets.DATA_GOV_API_KEY }}
+          FC_RELAY_URL: ${{ secrets.FC_RELAY_URL }}
+          FC_RELAY_TOKEN: ${{ secrets.FC_RELAY_TOKEN }}
         run: python scripts/fetch_prices.py
 
       - name: Commit updated prices
-        shell: pwsh
         run: |
           git config user.name "farmconnect-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/prices.json data/board.json
-          git diff --cached --quiet
-          if ($LASTEXITCODE -eq 1) {
-            git commit -m "Update mandi prices"
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            git push
-            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          }
-          elseif ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-          else {
-            Write-Host "No price changes."
-          }
+          if git diff --cached --quiet; then
+            echo "No price changes."
+            exit 0
+          fi
+          git commit -m "Update mandi prices"
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

@@ -54,41 +54,80 @@ ALIAS = {
 def key(s):
     return re.sub(r"[^a-z0-9]", "", (s or "").lower())
 
-def http_json(params, tries=4):
-    """Request JSON with a few attempts for temporary errors.
+RELAY_URL = os.environ.get("FC_RELAY_URL", "").strip().rstrip("/")
+RELAY_TOKEN = os.environ.get("FC_RELAY_TOKEN", "").strip()
+MIN_ITEMS = int(os.environ.get("FC_MIN_ITEMS", "10"))        # refuse to overwrite good data with fewer matched commodities
+MAX_BAD_FRAC = float(os.environ.get("FC_MAX_BAD_FRAC", "0.2"))  # refuse if more than this share of matched rows look invalid
+PRICE_MIN, PRICE_MAX = 0.1, 10000.0                           # Rs per kg sanity window after quintal conversion
+SECRETS = [s for s in (os.environ.get("DATA_GOV_API_KEY", "").strip(), RELAY_TOKEN) if len(s) >= 6]
 
-    Kept short on purpose: the workflow runs several times a day, so a run that
-    cannot get through just stops and the next scheduled run tries again."""
-    url = BASE + "?" + urllib.parse.urlencode(params)
+def redact(text):
+    """Remove any secret value (and api-key query values) from text before it is printed."""
+    text = str(text)
+    for s in SECRETS:
+        text = text.replace(s, "***")
+    return re.sub(r"(api-key=)[^&\s\"']+", r"\1***", text)
+
+def classify(exc):
+    """Map a low-level error to a short, actionable category."""
+    t = str(exc).lower()
+    if "10061" in t or "refused" in t:
+        return "NETWORK: connection actively refused (host blocks this network)"
+    if "10060" in t or "timed out" in t or "timeout" in t:
+        return "NETWORK: connection timed out (host blocks or drops this network)"
+    if "name or service not known" in t or "getaddrinfo" in t or "11001" in t:
+        return "DNS: could not resolve host"
+    if "certificate" in t or "ssl" in t:
+        return "TLS: certificate or handshake problem"
+    return "ERROR: " + type(exc).__name__
+
+def http_json(params, tries=3):
+    """GET JSON, directly or through the relay. Short timeouts, few retries, secrets never printed."""
+    params = dict(params)
+    headers = {"User-Agent": "FarmConnect-fetch/2.0", "Accept": "application/json"}
+    if RELAY_URL:
+        headers["X-Relay-Token"] = RELAY_TOKEN
+        headers["X-Api-Key"] = params.pop("api-key", "")
+        url = RELAY_URL + "/?" + urllib.parse.urlencode(params)
+    else:
+        url = BASE + "?" + urllib.parse.urlencode(params)
     ctx = ssl.create_default_context()
     last = None
     for i in range(tries):
         try:
-            req = urllib.request.Request(
-                url,
-                headers={"User-Agent": "curl/8.1.2", "Accept": "application/json"},
-            )
-            with urllib.request.urlopen(req, timeout=60, context=ctx) as r:
-                return json.load(r)
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=30, context=ctx) as r:
+                raw = r.read()
+            try:
+                return json.loads(raw)
+            except ValueError:
+                raise RuntimeError("response was not JSON (first bytes: %s)" % redact(raw[:120].decode("utf-8", "replace")))
         except urllib.error.HTTPError as e:
             body = ""
             try:
-                body = e.read().decode("utf-8", "replace")[:200]
+                body = redact(e.read().decode("utf-8", "replace")[:200])
             except Exception:
                 pass
-            last = "HTTP %s %s" % (e.code, body)
+            if e.code == 401 and RELAY_URL:
+                last = "AUTH: relay rejected FC_RELAY_TOKEN (HTTP 401)"
+            elif e.code in (401, 403):
+                last = "AUTH: data.gov.in rejected the request (HTTP %s) - check DATA_GOV_API_KEY. %s" % (e.code, body)
+            elif e.code == 502 and RELAY_URL:
+                last = "RELAY: Worker could not reach data.gov.in (HTTP 502) %s" % body
+            else:
+                last = "HTTP %s %s" % (e.code, body)
             print("  attempt %d/%d: %s" % (i + 1, tries, last), file=sys.stderr)
             if e.code in (400, 401, 403, 404):
                 break
             if i + 1 < tries:
-                delay = 30 * (i + 1) if e.code == 429 else min(10 * (i + 1), 30)
+                delay = 20 * (i + 1) if e.code == 429 else 5 * (i + 1)
                 print("  retrying in %d seconds..." % delay, file=sys.stderr)
                 time.sleep(delay)
         except Exception as e:
-            last = e
+            last = classify(e) if not isinstance(e, RuntimeError) else "ERROR: " + redact(e)
             print("  attempt %d/%d: %s" % (i + 1, tries, last), file=sys.stderr)
             if i + 1 < tries:
-                delay = min(10 * (i + 1), 30)
+                delay = 5 * (i + 1)
                 print("  retrying in %d seconds..." % delay, file=sys.stderr)
                 time.sleep(delay)
     raise RuntimeError("API request failed after %d attempts: %s" % (tries, last))
@@ -209,10 +248,39 @@ def age_days(updated):
     except Exception:
         return None
 
+def atomic_write_json(path, obj):
+    """Write to a temp file in the same folder, then replace: a crash never leaves half a file."""
+    path = os.path.abspath(path)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(obj, f, ensure_ascii=False, separators=(",", ":"))
+    json.loads(open(tmp, encoding="utf-8").read())        # must parse back
+    os.replace(tmp, path)
+
+def summary(line):
+    """Append to the GitHub job summary when running in Actions."""
+    p = os.environ.get("GITHUB_STEP_SUMMARY")
+    if p:
+        with open(p, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+
+def fail_or_keep(msg, old):
+    """Fetch problem: keep existing files. Fail the run only when stored prices are stale."""
+    age = age_days(old.get("updated"))
+    print("::warning::" + redact(msg))
+    summary("### Price update skipped\n" + redact(msg))
+    if age is None or age > STALE_DAYS:
+        sys.exit(redact(msg) + " (stored prices are %s)" % ("missing" if age is None else "%.1f days old" % age))
+    print("Keeping the last prices (%.1f days old). The next scheduled run will try again." % age)
+
 def main():
     api_key = os.environ.get("DATA_GOV_API_KEY", "").strip()
     if not api_key:
         sys.exit("DATA_GOV_API_KEY is not set. Add it as a repository secret (see GUIDE).")
+    if RELAY_URL and not RELAY_TOKEN:
+        sys.exit("FC_RELAY_URL is set but FC_RELAY_TOKEN is empty.")
+    print("Route:", "relay (Cloudflare Worker)" if RELAY_URL else "DIRECT to api.data.gov.in")
 
     try:
         with open(OUT, encoding="utf-8") as f:
@@ -226,19 +294,34 @@ def main():
     rows = fetch_rows(api_key)
     if not rows:
         if FAILED:
-            msg = "The API could not be reached after retries; no files were changed. Last error: " + FAILED[-1]
-            age = age_days(old.get("updated"))
-            if age is None or age > STALE_DAYS:
-                # Nothing usable on disk, or it has been stale too long: fail so the owner is alerted.
-                sys.exit(msg + " (stored prices are %s)" % ("missing" if age is None else "%.1f days old" % age))
-            print("::warning::" + msg)
-            print("Keeping the last prices (%.1f days old). The next scheduled run will try again." % age)
-            return
+            hint = "" if RELAY_URL else " Direct access from GitHub-hosted runners is blocked by data.gov.in; configure the relay (see relay/README.md)."
+            return fail_or_keep("The API could not be reached; no files were changed. Last error: " + FAILED[-1] + hint, old)
         print("NO DATA AVAILABLE: data.gov.in responded successfully but returned no mandi rows yet.")
         print("This is a normal no-data result. Keeping the last successful prices unchanged.")
+        summary("### No new mandi rows today. Existing prices kept.")
         return
     print("Got %d rows from %d districts" % (len(rows), len(set((pick(r, "district") or "") for r in rows))))
+
     agg, unmatched = aggregate(rows)
+
+    # ---- validate BEFORE touching any file -------------------------------------------------
+    bad = total = 0
+    for name, days in agg.items():
+        for d, v in days.items():
+            total += 1
+            if not (PRICE_MIN <= v["m"] <= PRICE_MAX) or v["lo"] > v["hi"] + 1e-9:
+                bad += 1
+    if len(agg) < MIN_ITEMS:
+        return fail_or_keep("Validation failed: only %d commodities matched (minimum %d); refusing to overwrite good data." % (len(agg), MIN_ITEMS), old)
+    if total and bad / float(total) > MAX_BAD_FRAC:
+        return fail_or_keep("Validation failed: %d of %d price points are outside Rs %.1f-%.0f per kg; refusing to overwrite good data." % (bad, total, PRICE_MIN, PRICE_MAX), old)
+    if bad:
+        print("Dropping %d implausible price points" % bad)
+        for name in list(agg):
+            agg[name] = {d: v for d, v in agg[name].items() if PRICE_MIN <= v["m"] <= PRICE_MAX and v["lo"] <= v["hi"] + 1e-9}
+            if not agg[name]:
+                del agg[name]
+
     board = build_board(rows)
     if not board:
         print("No Bengaluru-area rows today: showing all %s markets on the board instead" % STATE)
@@ -246,15 +329,6 @@ def main():
         LOCAL[:] = [""]                      # "" matches every district
         board = build_board(rows)
         LOCAL[:] = saved
-    if board:
-        bp = os.path.join(os.path.dirname(os.path.abspath(OUT)), "board.json")
-        os.makedirs(os.path.dirname(bp), exist_ok=True)
-        with open(bp, "w", encoding="utf-8") as f:
-            json.dump({"updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                       "date": max(x[7] for x in board), "unit": "rupees per kg (wholesale)",
-                       "cols": ["commodity", "variety", "market", "district", "min", "max", "modal", "date"],
-                       "rows": board}, f, ensure_ascii=False, separators=(",", ":"))
-        print("Wrote board.json:", len(board), "rows,", len(set(x[2] for x in board)), "markets")
 
     if not history and AUTO_BACKFILL > 0:
         print("No history yet: back-filling up to %d days" % AUTO_BACKFILL)
@@ -293,10 +367,17 @@ def main():
         "history": hist_out,
         "unmatched": sorted(unmatched, key=lambda k: -unmatched[k])[:40],
     }
-    os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f:
-        json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
+    # ---- write (both files only after everything above succeeded) ---------------------------
+    if board:
+        bp = os.path.join(os.path.dirname(os.path.abspath(OUT)), "board.json")
+        atomic_write_json(bp, {"updated": doc["updated"],
+                               "date": max(x[7] for x in board), "unit": "rupees per kg (wholesale)",
+                               "cols": ["commodity", "variety", "market", "district", "min", "max", "modal", "date"],
+                               "rows": board})
+        print("Wrote board.json:", len(board), "rows,", len(set(x[2] for x in board)), "markets")
+    atomic_write_json(OUT, doc)
     print("Wrote %s: %d commodities, latest data date %s" % (OUT, len(detail), latest))
+    summary("### Prices updated\n%d commodities, latest data date %s, %d board rows" % (len(detail), latest, len(board)))
 
 if __name__ == "__main__":
     main()
