@@ -170,3 +170,6 @@ FarmConnect is released under the [MIT License](LICENSE).
 **[Explore FarmConnect](https://manishn1877.github.io/Farm-Connect/)** · **[View the source on GitHub](https://github.com/manishn1877/Farm-Connect)**
 
 </div>
+Made with ❤️ and dedication by **Manish N. (@manishn1877)**.
+
+If you like FarmConnect, please give this project a ⭐star on GitHub — it means a lot!
