@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#effaf1"/><stop offset="1" stop-color="#fff7e7"/></linearGradient>
+<linearGradient id="g" x2="1"><stop stop-color="#16784b"/><stop offset="1" stop-color="#39a96b"/></linearGradient></defs>
+<rect width="1200" height="330" rx="28" fill="url(#bg)"/>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+<g transform="translate(80 45)"><rect width="220" height="220" rx="24" fill="#fff" stroke="#cfe7d4" stroke-width="3"/><text x="110" y="82" font-size="58">👨🏽‍🌾</text><text x="110" y="132" font-size="24" font-weight="700" fill="#185b3b">FARMER</text><text x="110" y="164" font-size="16" fill="#52665a">Lists fresh produce</text><text x="110" y="188" font-size="16" fill="#52665a">and available quantity</text></g>
+<g transform="translate(490 45)"><rect width="220" height="220" rx="24" fill="#fff" stroke="#f0d9a8" stroke-width="3"/><text x="110" y="82" font-size="58">📊</text><text x="110" y="132" font-size="24" font-weight="700" fill="#8b5a12">MARKET DATA</text><text x="110" y="164" font-size="16" fill="#6b6253">Daily mandi prices</text><text x="110" y="188" font-size="16" fill="#6b6253">and 7-day outlook</text></g>
+<g transform="translate(900 45)"><rect width="220" height="220" rx="24" fill="#fff" stroke="#cfe7d4" stroke-width="3"/><text x="110" y="82" font-size="58">🛒</text><text x="110" y="132" font-size="24" font-weight="700" fill="#185b3b">CUSTOMER</text><text x="110" y="164" font-size="16" fill="#52665a">Discovers local produce</text><text x="110" y="188" font-size="16" fill="#52665a">and places an order*</text></g>
+<path d="M320 155 H470 M730 155 H880" stroke="url(#g)" stroke-width="8" stroke-linecap="round"/><path d="M455 140 L475 155 L455 170 M865 140 L885 155 L865 170" fill="none" stroke="#238b57" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="600" y="302" font-size="15" fill="#64746a">*Ordering and account features require the backend; the public GitHub Pages demo is the static frontend.</text>
+</g></svg>

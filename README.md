@@ -1,121 +1,125 @@
+<div align="center">
+
+
 # 🌾 FarmConnect
 
-**Connecting farmers directly with customers: fresh produce, fair prices, no middlemen.**
+### From the farmer's field to the customer's basket — with market prices that help farmers plan.
 
-[**🌐 Live demo**](https://manishn1877.github.io/Farm-Connect/) · [**🐛 Report a bug**](https://github.com/manishn1877/Farm-Connect/issues) · [**💡 Request a feature**](https://github.com/manishn1877/Farm-Connect/issues) · [**🤝 Contribute**](CONTRIBUTING.md)
+[**Open the live demo**](https://manishn1877.github.io/Farm-Connect/) · [Report an issue](https://github.com/manishn1877/Farm-Connect/issues) · [Contribute](CONTRIBUTING.md)
 
-![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)
-![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
-![Good first issues](https://img.shields.io/badge/good%20first%20issues-available-blue.svg)
+![MIT License](https://img.shields.io/badge/license-MIT-238b57)
+![Open source](https://img.shields.io/badge/open%20source-community%20built-2d7db3)
+
+</div>
 
 ---
 
-## Why FarmConnect?
+## 🌱 What is FarmConnect?
 
-Farmers often lose a large share of their income to middlemen, while customers pay more for produce that has travelled through many hands. FarmConnect is an open-source platform that lets farmers list their produce and customers browse and order it directly.
+FarmConnect is an open-source farm-to-customer platform concept. It brings local produce listings, market information and farmer-focused price insights into one place.
 
-## Features
+The goal is simple: make it easier for farmers to understand market movement and connect with customers, while helping customers discover fresh local produce.
 
-- 🥕 **110-item produce catalog** with matching photos
-- 🖼️ **Smart image loading**: local photos first, with an automatic Wikipedia/Wikimedia fallback
-- 👨‍🌾 **Farmer and customer data**, login and orders (via the Node/SQLite backend)
-- 📊 **Karnataka mandi price data** fetched from the Government of India's data.gov.in Agmarknet resource
-- 🔄 **Automatic price refresh** through GitHub Actions, scheduled twice daily
-- 🛡️ **Cloudflare Worker relay** for the official price API, with a shared secret and restricted upstream/parameters
-- 🌐 **Static frontend** that runs on GitHub Pages with no server needed for browsing
-- 🗄️ **Node.js + SQLite backend** with seed data, ready to deploy on Render
+<img src="docs/images/farmconnect-journey.svg" alt="Farmer to market data to customer journey" width="100%">
 
-## Live demo
+## 🧺 Explore the experience
 
-The demo at **https://manishn1877.github.io/Farm-Connect/** is the **static frontend only**. GitHub Pages cannot run the Node server, so login, farmer/customer data and orders need the backend running (see below).
+| 🥬 Fresh produce | 👨‍🌾 Farmer tools | 🛍️ Customer experience |
+|---|---|---|
+| Browse a broad catalogue of fruits, vegetables, greens and staples. | List produce, quantities and prices; view market information and crop outlook. | Discover local produce and browse listings by market. |
+| Product photos load from bundled assets where available, with an online fallback. | Farmer account, listing and order features are supported by the Node/SQLite backend. | The complete account and ordering experience requires the backend to be deployed. |
 
-## Mandi price data automation
+## 📈 The farmer's price forecast
 
-FarmConnect retrieves official daily wholesale market prices for Karnataka from the Government of India's [Open Government Data Platform](https://data.gov.in/), using the Agmarknet resource **Current Daily Price of Various Commodities from Various Markets (Mandi)** (resource ID: `9ef84268-d588-465a-a308-a864a43d0070`).
+One of FarmConnect's important features is its **7-day mandi price outlook**. It helps a farmer see which supported commodities have recently been moving up, down or staying relatively steady.
 
-The workflow is scheduled for **11:10 AM and 7:10 PM India Standard Time (IST)**. It can also be started manually from **GitHub → Actions → Update daily mandi prices → Run workflow**.
+<img src="docs/images/price-forecast-explained.svg" alt="Illustration explaining the seven-day price forecast" width="100%">
 
-### How the relay works
+### What the forecast shows
 
-GitHub-hosted runners may be unable to connect directly to `api.data.gov.in`. The Cloudflare Worker provides a small authenticated HTTPS relay between GitHub Actions and the official data source:
+- **Rising / falling / steady:** a simple direction label based on the estimated movement over the next seven days.
+- **Estimated price range:** a range around the seven-day estimate, rather than a single guaranteed number.
+- **Trend chart:** recent market observations followed by a projected line and uncertainty band.
+- **Crop search:** look up a supported fruit, vegetable or other tracked commodity.
+- **Your crops:** where a farmer's listed products match mandi commodities, the dashboard can highlight those outlooks.
 
-```text
-GitHub Actions
-     |
-     | HTTPS + X-Relay-Token
-     v
-Cloudflare Worker (authenticated relay)
-     |
-     | HTTPS + data.gov.in API key
-     v
-Government of India data.gov.in
-     |
-     v
-scripts/fetch_prices.py
-     |
-     +--> data/prices.json
-     +--> data/board.json
-```
+### How the estimate is calculated
 
-The Worker is deployed at [farmconnect-mandi-relay.manishn1877.workers.dev](https://farmconnect-mandi-relay.manishn1877.workers.dev). It is not an open proxy: it checks the relay token, uses a fixed upstream API, and allows only approved query parameters. The API key and relay token belong in secrets, never in source files or logs.
+The application reads dated price history from `data/prices.json`. It uses up to the latest **21 available observations**, fits a simple linear trend, and projects the next **7 days**. At least **3 dated observations** are needed before a forecast is displayed.
 
-### Required GitHub Actions secrets
+> **Please use forecasts as guidance, not a promise.** This is currently a simple statistical trend estimate, not a trained machine-learning model. It does not yet model weather, crop arrivals, transport costs, festivals, local demand or sudden market disruptions. Always compare the outlook with current local mandi prices and your own costs before deciding when to sell.
 
-Repository maintainers configure these under **Settings → Secrets and variables → Actions**:
+**Where it is available:** the forecast interface is implemented in the root `index.html` used by the GitHub Pages demo. The separate `server/public/index.html` backend-served frontend has not yet been brought to the same forecast-interface feature parity.
 
-| Secret | Purpose |
-| --- | --- |
-| `DATA_GOV_API_KEY` | API key issued by data.gov.in |
-| `FC_RELAY_URL` | Deployed Cloudflare Worker URL |
-| `FC_RELAY_TOKEN` | Shared token matching the Worker's `RELAY_TOKEN` secret |
+## 📊 Official Karnataka mandi prices
 
-Never commit real secret values, paste them into issues, or include them in screenshots. The detailed deployment, testing, and recovery instructions are in [relay/README.md](relay/README.md).
+FarmConnect collects daily wholesale market prices for Karnataka from the Government of India's Open Government Data Platform, using the Agmarknet resource:
 
-### Price data files
+**Current Daily Price of Various Commodities from Various Markets (Mandi)**
 
-- `data/prices.json` — aggregated price history used by the application.
-- `data/board.json` — market/board-level prices for the Bengaluru-area markets represented in the feed.
+The automated workflow refreshes the data twice daily:
 
-The fetch script validates incoming data and avoids replacing usable stored data with an invalid or unexpectedly small result. Check the Actions run logs if an update fails.
+- **11:10 AM IST**
+- **7:10 PM IST**
 
-## Project structure
+It can also be started manually from **GitHub → Actions → Update daily mandi prices → Run workflow**.
 
-```text
-Farm-Connect/
-├── index.html                  # Main FarmConnect website (frontend)
-├── produce/                    # Catalog, produce photos and image helper
-├── server/                     # Node.js + SQLite backend and seed data
-├── data/
-│   ├── prices.json             # Aggregated mandi price data
-│   └── board.json              # Market-level price data
-├── scripts/
-│   └── fetch_prices.py         # Official mandi price fetch and processing
-├── relay/
-│   ├── worker.js               # Cloudflare Worker relay
-│   ├── wrangler.toml           # Worker deployment configuration
-│   └── README.md               # Relay setup, secrets, testing and troubleshooting
-├── .github/workflows/          # Price update and site deployment workflows
-├── GUIDE.txt                   # Extra setup notes
-└── CONTRIBUTING.md             # Contribution guidelines
-```
+<img src="docs/images/mandi-data-flow.svg" alt="Automated mandi data flow from GitHub Actions through Cloudflare Worker to data.gov.in and FarmConnect" width="100%">
 
-## Getting started
+### Data files
 
-### Option 1: Frontend only (quickest)
+| File | What it contains |
+|---|---|
+| `data/prices.json` | Aggregated commodity prices and dated history used by the application. |
+| `data/board.json` | Market / board-level price records used for market information. |
 
-Open `index.html` in your browser, or serve the folder:
+### Secure API relay
+
+A Cloudflare Worker relays requests from GitHub Actions to `data.gov.in`. It checks a shared relay token, uses a fixed upstream endpoint and restricts allowed query parameters. It is **not an open proxy**.
+
+The API key and relay token are stored as secrets — never commit them or paste them into screenshots.
+
+Required repository Actions secrets:
+
+- `DATA_GOV_API_KEY`
+- `FC_RELAY_URL`
+- `FC_RELAY_TOKEN`
+
+Deployment, configuration, testing and troubleshooting instructions: [`relay/README.md`](relay/README.md).
+
+## 🧰 Built with
+
+| Area | Technology |
+|---|---|
+| Frontend | HTML, CSS and JavaScript |
+| Backend | Node.js |
+| Database | SQLite |
+| Market data | Government of India data.gov.in / Agmarknet |
+| Scheduled updates | GitHub Actions |
+| Secure API relay | Cloudflare Workers |
+| Static hosting | GitHub Pages |
+
+## 🚀 Try FarmConnect
+
+### Live website
+
+Visit **[manishn1877.github.io/Farm-Connect](https://manishn1877.github.io/Farm-Connect/)**.
+
+The GitHub Pages deployment is the static frontend. It can display the site and published mandi data, but GitHub Pages does not run the Node server. Login, persistent farmer/customer data and live order handling require the backend.
+
+### Run the frontend locally
 
 ```bash
-# from the project root
+git clone https://github.com/manishn1877/Farm-Connect.git
+cd Farm-Connect
 python -m http.server 8000
-# then visit http://localhost:8000
 ```
 
-Produce photos need an internet connection for the Wikipedia fallback.
+Open `http://localhost:8000` in your browser.
 
-### Option 2: Full app with backend
+### Run the backend
 
-Requires [Node.js](https://nodejs.org/) (LTS recommended).
+Requires a current [Node.js](https://nodejs.org/) LTS release.
 
 ```bash
 git clone https://github.com/manishn1877/Farm-Connect.git
@@ -124,54 +128,45 @@ npm install
 node server.js
 ```
 
-The server serves the same `index.html`, so the complete system (login, farmer/customer data, orders) runs together. Check `GUIDE.txt` and the `server/` folder for the port and any configuration.
+See `GUIDE.txt` and the `server/` directory for additional configuration.
 
-### Optional: download produce photos locally
+## 🗂️ Project map
 
-```bash
-python produce/download_images.py
+```text
+Farm-Connect/
+├── index.html                 # GitHub Pages frontend + price forecast
+├── produce/                   # Produce catalogue and image tools
+├── server/                    # Node.js + SQLite backend
+├── data/
+│   ├── prices.json            # Aggregated mandi prices and history
+│   └── board.json              # Board-level market data
+├── scripts/
+│   └── fetch_prices.py         # Fetches and processes official prices
+├── relay/
+│   ├── worker.js               # Authenticated Cloudflare relay
+│   ├── wrangler.toml           # Worker deployment configuration
+│   └── README.md               # Relay guide
+├── docs/
+│   └── images/                 # README illustrations
+└── .github/workflows/          # Automation and deployment workflows
 ```
 
-This downloads missing Wikipedia/Wikimedia thumbnails into `produce/` so the site doesn't need to fetch them at runtime.
+## 🤝 Contribute
 
-## How produce images work
+Ideas, bug reports, translations, design improvements and code contributions are welcome.
 
-1. The site loads `produce/catalog.json`.
-2. If a bundled photo exists (for example `produce/tomato.jpg`), it is used first.
-3. Otherwise the visitor's browser requests the item's thumbnail from the Wikipedia REST API.
-4. Successful lookups are cached in the browser's local storage.
+1. Read [`CONTRIBUTING.md`](CONTRIBUTING.md).
+2. Browse [open issues](https://github.com/manishn1877/Farm-Connect/issues).
+3. Create a branch, make your change and open a pull request.
 
-## Deployment
+## 📜 License
 
-**Static version (GitHub Pages):** push to the repository, then enable Pages under *Settings → Pages* using the branch and root folder. Hard-refresh (`Ctrl+F5`) after it publishes.
+FarmConnect is released under the [MIT License](LICENSE).
 
-**Full version (Node server):** deploy the `server/` folder to a Node host such as [Render](https://render.com) using the included `server/render.yaml`, and serve `index.html` from that server.
+<div align="center">
 
-**Mandi price automation:** the `Update daily mandi prices` GitHub Actions workflow runs on its schedule and can be run manually. It requires the three repository secrets listed above. See [relay/README.md](relay/README.md) before recreating or moving the Worker.
+### Built to bring farmers, markets and customers closer.
 
-## Contributing
+**[Explore FarmConnect](https://manishn1877.github.io/Farm-Connect/)** · **[View the source on GitHub](https://github.com/manishn1877/Farm-Connect)**
 
-Contributions of all sizes are welcome: code, design, translations, docs, bug reports and ideas.
-
-1. Read the [Contributing Guide](CONTRIBUTING.md).
-2. Pick an issue labeled [`good first issue`](https://github.com/manishn1877/Farm-Connect/labels/good%20first%20issue).
-3. Fork, branch, make your change and open a pull request.
-
-## Roadmap
-
-- [ ] Search and filter produce
-- [ ] Multi-language support (Hindi, Kannada, more)
-- [ ] Farmer profile pages
-- [ ] Improved mobile layout
-- [ ] API documentation
-- [ ] Order tracking
-
-Have an idea? [Open an issue](https://github.com/manishn1877/Farm-Connect/issues).
-
-## License
-
-Released under the [MIT License](LICENSE).
-
-## Author
-
-Built by [@manishn1877](https://github.com/manishn1877). If FarmConnect is useful to you, please ⭐ the repo!
+</div>
